@@ -7,3 +7,20 @@ services:
       - "8001:8001"
     volumes:
       - ./services/auth-service/app:/app/app
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    container_name: ai-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: vishal@123
+      POSTGRES_DB: auth_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
