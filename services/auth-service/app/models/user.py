@@ -2,23 +2,22 @@ from app.db.base import Base
 from sqlalchemy.orm import Mapped , mapped_column 
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import String , Enum , Boolean , DateTime , func
-from pydantic import EmailStr
-from uuid import uuid4
+from uuid import uuid4 , UUID as PyUUID
 from app.core.constant import UserRole
 from datetime import datetime
 
 class User(Base):
     __tablename__ = "users"
     
-    id : Mapped[UUID] = mapped_column(UUID(as_uuid=True) , index=True , primary_key=True , default=uuid4),
+    id : Mapped[PyUUID] = mapped_column(UUID(as_uuid=True) , index=True , primary_key=True , default=uuid4)
     
     
     first_name :Mapped[str] = mapped_column(String(100) , nullable=False )
     last_name : Mapped[str] = mapped_column(String(100) , nullable=True)
     
-    email : Mapped[EmailStr] = mapped_column(EmailStr , index=True , unique=True , nullable= False)
+    email : Mapped[str] = mapped_column(String(255) , index=True , unique=True , nullable= False)
     
-    password_hash : Mapped[str] = mapped_column(String(255) , nullable=False),
+    password_hash : Mapped[str] = mapped_column(String(255) , nullable=False)
     
     role : Mapped[UserRole] = mapped_column(Enum(UserRole) , default=UserRole.STUDENT , nullable=False)
     
