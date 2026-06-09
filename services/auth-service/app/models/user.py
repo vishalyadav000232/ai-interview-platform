@@ -8,6 +8,8 @@ from app.core.constant import UserRole
 from datetime import datetime
 
 class User(Base):
+    __tablename__ = "users"
+    
     id : Mapped[UUID] = mapped_column(UUID(as_uuid=True) , index=True , primary_key=True , default=uuid4),
     
     
