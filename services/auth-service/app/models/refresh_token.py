@@ -26,9 +26,9 @@ class RefreshToken(Base):
     
     token_hash : Mapped[str] = mapped_column(
         String(255) , nullable=False)
-    expire_at : Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    expire_at : Mapped[datetime] = mapped_column(DateTime(timezone=True),nullable=False)
     
-    is_revoke :Mapped[bool] = mapped_column(Boolean , default=False),
+    is_revoke :Mapped[bool] = mapped_column(Boolean , default=False)
     created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True) , server_default=func.now())
     
 

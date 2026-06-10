@@ -9,6 +9,8 @@ services:
       - "8001:8001"
     volumes:
       - ./services/auth-service/app:/app/app
+      - ./services/auth-service/migrations:/app/migrations
+      - ./services/auth-serivce/alembic.ini:/app.alembic.ini
     depends_on:
       - postgres
 
