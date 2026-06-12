@@ -12,13 +12,13 @@ class TokenServiceInterface(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def verify_access_token(self,token: str,) -> str:
+    async def verify_access_token(self,token: str,) -> dict:
         raise NotImplementedError
 
     @abstractmethod
-    async def verify_refresh_token( self,token: str,) -> tuple[str, str]:
+    async def verify_refresh_token( self,token: str,) -> dict:
         raise NotImplementedError
 
     @abstractmethod
-    async def revoke_refresh_token(self,token: str,) -> bool:
+    async def revoke_refresh_token(self,jti: str,) -> bool:
         raise NotImplementedError
