@@ -102,11 +102,12 @@ class TokenService(TokenServiceInterface):
             }
         )
             return refresh_token
-        except Exception:
+        except Exception as error:
+            logger.exception("Refresh token creation failed")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Could not create refresh token"
-            )
+            ) from error
         
     async def verify_token(self , token : str , token_type : str)-> dict:
         if not token:
@@ -114,7 +115,7 @@ class TokenService(TokenServiceInterface):
             raise ValueError("missing token")
         
         try:
-            payload = jwt.decode(token  , self.secret_key , algorithm= self.algorithm)
+            payload = jwt.decode(token  , self.secret_key , algorithm= [self.algorithm])
             
             actual_type = payload.get("type")
             user_id = payload.get("sub")
@@ -159,7 +160,31 @@ class TokenService(TokenServiceInterface):
         return await self.verify_token(token, token_type="access")
 
     async def verify_refresh_token(self, token: str) -> dict:
-        return await self.verify_token(token, token_type="refresh")
+        payload =  await self.verify_token(token, token_type="refresh")
+        jti = payload.get("jti")
+        if not jti:
+            logger.warning(
+                "Refresh token revoke failed: missing jti",
+                extra={"user_id": payload.get("sub")}
+            )
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token"
+                
+                
+        )
+            
+        is_valid = await self.refresh_service.validate_token(jti=jti)
+        
+        
+        if not is_valid:
+            raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token revoked or expired"
+        )
+            return payload
+        
+        
     
     
     
@@ -186,6 +211,62 @@ class TokenService(TokenServiceInterface):
         )
         
         return result
+    
+    async def rotate_refresh_token(self , refresh_token : str)->dict:
+        payload = await self.verify_refresh_token(token=refresh_token)
+        
+        old_jti = payload.get("jti")
+        user_id = payload.get("sub")
+        
+        if not old_jti or not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token"
+            )
+        
+        await self.refresh_service.revoke_token(old_jti)
+        
+        new_access_token = await self.create_access_token(user_id=user_id)
+        new_refresh_token= await self.create_refresh_token(user_id=user_id)
+        
+        
+        logger.info(
+            "Refresh token rotated",
+            extra={
+                "user_id": user_id,
+                "old_jti": old_jti
+            }
+        )
+        
+        return {
+        "access_token": new_access_token,
+        "refresh_token": new_refresh_token,
+        "token_type": "bearer"
+    }
+        
+    async def revoke_all_user_sessions(self, user_id: UUID | str) -> int:
+        if not user_id:
+            raise ValueError("user_id is missing")
+
+        revoked_count = await self.refresh_service.revoke_all_user_tokens(
+            user_id=user_id
+        )
+
+        logger.info(
+            "All user sessions revoked",
+            extra={
+                "user_id": str(user_id),
+                "revoked_count": revoked_count
+            }
+        )
+
+        return revoked_count
+
+
+
+    
+    
+    
             
             
 

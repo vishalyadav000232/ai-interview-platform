@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-
+from uuid import UUID
 
 class TokenServiceInterface(ABC):
 
@@ -22,3 +22,12 @@ class TokenServiceInterface(ABC):
     @abstractmethod
     async def revoke_refresh_token(self,jti: str,) -> bool:
         raise NotImplementedError
+    
+    @abstractmethod
+    async def rotate_refresh_token(self, refresh_token: str) -> dict:
+        raise NotImplementedError
+    
+    @abstractmethod
+    async def revoke_all_user_sessions(self, user_id: UUID | str) -> int:
+        raise NotImplementedError
+        

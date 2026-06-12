@@ -62,16 +62,19 @@ class RefreshTokenRepository(RefreshTokenRepositoryInterface):
         
         stmt = update(RefreshToken).where(
             RefreshToken.user_id == user_id,
-            RefreshToken.is_revoke == False
+            RefreshToken.is_revoked == False
         ).values(
             is_revoked =True,
-            revoked_at = datetime.utcnow
+            revoked_at= datetime.utcnow
         )
-        
-        results = await self.db.execute(stmt)
-        await self.db.commit()
-        
-        return results.rowcount() or 0
+        try:
+            results = await self.db.execute(stmt)
+            await self.db.commit()
+            
+            return results.rowcount or 0
+        except Exception:
+            await self.db.rollback()
+            raise
     
     async def get_by_jti(self,jti: str,) -> RefreshToken | None:
 
