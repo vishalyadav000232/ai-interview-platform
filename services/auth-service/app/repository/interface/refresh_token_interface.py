@@ -1,26 +1,36 @@
-from abc import ABC , abstractmethod
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.refresh_token import RefreshToken
-from app.schemas.refresh_token import RefreshTokenCreate
+from abc import ABC, abstractmethod
 from uuid import UUID
 
+from app.models.refresh_token import RefreshToken
+from app.schemas.refresh_token import RefreshTokenCreate
 
 
 class RefreshTokenRepositoryInterface(ABC):
-    
-    
+
     @abstractmethod
-    async def create(self , payload : RefreshTokenCreate , db : AsyncSession)-> RefreshToken:
-        pass
-    
+    async def create(
+        self,
+        payload: RefreshTokenCreate,
+    ) -> RefreshToken:
+        raise NotImplementedError
+
     @abstractmethod
-    async def get_by_token_hash(self , token_hash : str , db : AsyncSession)->RefreshToken:
-        pass
-    
+    async def get_by_token_hash(
+        self,
+        token_hash: str,
+    ) -> RefreshToken | None:
+        raise NotImplementedError
+
     @abstractmethod
-    async def revoke(self , token_id : UUID , db : AsyncSession)-> RefreshToken:
-        pass
-    
+    async def revoke(
+        self,
+        token_id: UUID,
+    ) -> RefreshToken:
+        raise NotImplementedError
+
     @abstractmethod
-    async def revoke_all_for_user( self , user_id : UUID , db : AsyncSession)-> int:
-        pass
+    async def revoke_all_for_user(
+        self,
+        user_id: UUID,
+    ) -> int:
+        raise NotImplementedError
