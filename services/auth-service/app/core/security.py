@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta, timezone
-from uuid import UUID
+from uuid import UUID , uuid4
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -57,11 +57,14 @@ class TokenService:
         expire = datetime.now(timezone.utc) + timedelta(
             days=settings.REFRESH_TOKEN_EXPIRE_DAYS
         )
+        
+        jti = str(uuid4())
 
         payload = {
             "sub": str(user_id),
             "type": "refresh",
             "exp": expire,
+            "jti" : jti,
             "iat": datetime.now(timezone.utc),
         }
 

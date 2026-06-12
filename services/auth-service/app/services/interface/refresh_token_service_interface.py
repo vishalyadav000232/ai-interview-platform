@@ -2,39 +2,38 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 from app.models.refresh_token import RefreshToken
-from app.schemas.refresh_token import RefreshTokenCreate
 
 
-class RefreshTokenRepositoryInterface(ABC):
-
-    @abstractmethod
-    async def create(
-        self,
-        payload: RefreshTokenCreate,
-    ) -> RefreshToken:
-        raise NotImplementedError
+class RefreshTokenServiceInterface(ABC):
 
     @abstractmethod
-    async def get_by_token_hash(
+    async def create_token(
         self,
+        user_id: UUID | str,
+        jti: str,
         token_hash: str,
-    ) -> RefreshToken | None:
+        expires_at,
+    ) -> RefreshToken:
         raise NotImplementedError
 
     @abstractmethod
-    async def revoke(
+    async def validate_token(
         self,
-        token_id: UUID,
-    ) -> RefreshToken:
+        jti: str,
+        token_hash: str,
+    ) -> bool:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def revoke_token(
+        self,
+        jti: str,
+    ) -> bool:
         raise NotImplementedError
 
     @abstractmethod
     async def revoke_all_for_user(
         self,
-        user_id: UUID,
+        user_id: UUID | str,
     ) -> int:
-        raise NotImplementedError
-    
-    @abstractmethod
-    async def get_by_jti(self , jti: str)->RefreshToken | None:
         raise NotImplementedError

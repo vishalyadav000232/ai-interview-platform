@@ -15,6 +15,7 @@ class RefreshToken(Base):
         primary_key=True,
         default=uuid4
     )
+    jti :Mapped[str] =mapped_column(String(255) , nullable=False , unique=True)
     
     user_id : Mapped[UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -25,10 +26,11 @@ class RefreshToken(Base):
     )
     
     token_hash : Mapped[str] = mapped_column(
-        String(255) , nullable=False)
-    expire_at : Mapped[datetime] = mapped_column(DateTime(timezone=True),nullable=False)
+        String(255) , nullable=False ,unique=True)
+    expires_at : Mapped[datetime] = mapped_column(DateTime(timezone=True),nullable=False)
     
-    is_revoke :Mapped[bool] = mapped_column(Boolean , default=False)
+    is_revoked :Mapped[bool] = mapped_column(Boolean , default=False)
+    revoked_at: Mapped[datetime] =mapped_column(DateTime(timezone=True), nullable=True)
     created_at : Mapped[datetime] = mapped_column(DateTime(timezone=True) , server_default=func.now())
     
 
