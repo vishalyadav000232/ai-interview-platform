@@ -18,8 +18,9 @@ class RefreshTokenRepository(RefreshTokenRepositoryInterface):
         
         refresh_token = RefreshToken(
             user_id = payload.user_id,
+            jti = payload.jti,
             token_hash= payload.token_hash,
-            expires_at=payload.expire_at
+            expires_at=payload.expires_at
         )
         
         self.db.add(refresh_token)
@@ -51,7 +52,7 @@ class RefreshTokenRepository(RefreshTokenRepositoryInterface):
         if refresh_token is None:
             return None
         
-        refresh_token.is_revoke = True
+        refresh_token.is_revoked = True
         
         await self.db.commit()
         await self.db.refresh(refresh_token)
@@ -65,7 +66,7 @@ class RefreshTokenRepository(RefreshTokenRepositoryInterface):
             RefreshToken.is_revoked == False
         ).values(
             is_revoked =True,
-            revoked_at= datetime.utcnow
+            revoked_at= datetime.utcnow()
         )
         try:
             results = await self.db.execute(stmt)

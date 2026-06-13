@@ -15,9 +15,13 @@ class AuthUserResponse(BaseModel):
 
     class Config:
         from_attributes = True
+        
+class DataReasponse(BaseModel):
+    user : AuthUserResponse
+    access_token : str
 
 
 class RegisterResponse(BaseModel):
     success: bool
     message: str
-    data: AuthUserResponse
+    data: DataReasponse

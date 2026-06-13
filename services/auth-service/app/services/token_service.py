@@ -68,6 +68,8 @@ class TokenService(TokenServiceInterface):
             
             jti = str(uuid4())
             
+            logger.info(f"this is the jti {jti}")
+            
             payload = {
                 "sub" : str(user_id),
                 "type" : "refresh",
