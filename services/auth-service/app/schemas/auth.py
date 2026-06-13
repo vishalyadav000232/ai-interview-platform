@@ -19,9 +19,16 @@ class AuthUserResponse(BaseModel):
 class DataReasponse(BaseModel):
     user : AuthUserResponse
     access_token : str
+    token_type : str | None = None
 
 
 class RegisterResponse(BaseModel):
     success: bool
     message: str
     data: DataReasponse
+    
+class LoginResponse(BaseModel):
+    success : bool
+    message: str
+    data : DataReasponse
+    

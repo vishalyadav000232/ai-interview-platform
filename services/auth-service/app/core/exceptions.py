@@ -34,4 +34,12 @@ class UserNotFound(AppException):
             status_code=404,
             error_code="USER_NOT_FOUND"
             )
-        
+
+
+class UserInactiveException(AppException):
+    def __init__(self):
+        super().__init__(
+            message="User account is inactive",
+            status_code=403,
+            error_code="USER_INACTIVE"
+        )

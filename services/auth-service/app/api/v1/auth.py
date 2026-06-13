@@ -1,12 +1,14 @@
 import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
-
-from app.schemas.user import CreateUser
+from fastapi.responses import Response
+from app.core.exceptions import AppException
+from app.schemas.user import CreateUser 
 from app.services.interface.auth import AuthServiceInterface
 from app.services.interface.token_service_interface import TokenServiceInterface
 from app.dependencies.service_deps import get_auth_service , get_token_service
-from app.schemas.auth import RegisterResponse
+from app.schemas.auth import RegisterResponse  , LoginResponse
+from fastapi.security import OAuth2PasswordRequestForm
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
@@ -25,6 +27,7 @@ async def test_route():
 
 @router.post("/register", status_code=status.HTTP_201_CREATED , response_model=RegisterResponse)
 async def register(
+    response : Response,
     user: CreateUser,
     auth_service: AuthServiceInterface = Depends(get_auth_service),
     token_service : TokenServiceInterface = Depends(get_token_service)
@@ -43,6 +46,22 @@ async def register(
         access_token = await token_service.create_access_token(created_user.id)
         refresh_token = await token_service.create_refresh_token(created_user.id)
         
+        logger.info(
+            "refresh_token success fully set into cookies " ,
+            extra={
+                "refresh" : refresh_token
+            }
+        )
+        
+        response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=False,      
+        samesite="lax",
+        max_age=7 * 24 * 60 * 60
+    )
+        
         
 
         return {
@@ -53,6 +72,9 @@ async def register(
                 "access_token" : access_token
             }
         }
+        
+    except AppException:
+        raise
 
     except ValueError as e:
         logger.warning(
@@ -75,3 +97,40 @@ async def register(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
         )
+
+
+
+
+
+@router.post("/login", response_model=LoginResponse)
+async def login(
+    response: Response,
+    payload: OAuth2PasswordRequestForm=Depends(),
+    auth_service: AuthServiceInterface = Depends(get_auth_service),
+    token_service: TokenServiceInterface = Depends(get_token_service),
+):
+    user = await auth_service.login(
+       payload
+    )
+
+    access_token = await token_service.create_access_token(user.id)
+    refresh_token = await token_service.create_refresh_token(user.id)
+
+    response.set_cookie(
+        key="refresh_token",
+        value=refresh_token,
+        httponly=True,
+        secure=False,  
+        samesite="lax",
+        max_age=7 * 24 * 60 * 60
+    )
+
+    return {
+        "success": True,
+        "message": "Login successful",
+        "data": {
+            "user": user,
+            "access_token": access_token,
+            "token_type": "bearer"
+        }
+    }

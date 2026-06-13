@@ -1,10 +1,15 @@
-
+import logging
 from app.services.interface.refresh_token_service_interface import RefreshTokenServiceInterface
 from app.repository.interface.refresh_token_interface import RefreshTokenRepositoryInterface
 from app.schemas.refresh_token import RefreshTokenCreate
 from uuid import UUID
 from datetime import datetime , timezone
 from app.models.refresh_token import RefreshToken
+import hmac
+
+
+logger = logging.getLogger(__name__)
+
 
 
 class RefreshTokenService(RefreshTokenServiceInterface):
@@ -29,10 +34,21 @@ class RefreshTokenService(RefreshTokenServiceInterface):
             expires_at = expires_at
         )
         
-        return await self.repo.create(payload)
+        refresh_token = await self.repo.create(payload)
+        
+        
+        logger.info(
+            "Refresh token record created",
+            extra={
+                "user_id": str(user_id),
+                "jti": jti,
+            }
+        )
+        
+        return refresh_token
     
     
-    async def validate_token(self, jti, token_hash)-> bool:
+    async def validate_token(self, jti : str, token_hash : str)-> bool:
         
         if not jti or not token_hash:
             return False
@@ -47,13 +63,13 @@ class RefreshTokenService(RefreshTokenServiceInterface):
             return False
         if refresh_token.expires_at <= datetime.now(timezone.utc):
             return False
-        if refresh_token.token_hash != token_hash:
+        if not hmac.compare_digest(refresh_token.token_hash, token_hash):
             return False
         
         return True
     
     
-    async def revoke_token(self, jti) -> bool:
+    async def revoke_token(self, jti :str) -> bool:
         
         if not jti:
             return False
@@ -68,6 +84,11 @@ class RefreshTokenService(RefreshTokenServiceInterface):
         
         
         revoked_token = await self.repo.revoke(refresh_token.id)
+        if revoked_token:
+            logger.info(
+                "Refresh token revoked",
+                extra={"jti": jti}
+            )
         
         return revoked_token is not None
     
@@ -79,7 +100,17 @@ class RefreshTokenService(RefreshTokenServiceInterface):
         if not user_id:
             raise ValueError("User id is required")
 
-        return await self.repo.revoke_all_for_user(user_id)
+        revoked_count = await self.repo.revoke_all_for_user(user_id)
+        logger.info(
+            "All refresh tokens revoked for user",
+            extra={
+                "user_id": str(user_id),
+                "revoked_count": revoked_count,
+            }
+        )
+        
+        return revoked_count
+
         
         
         
