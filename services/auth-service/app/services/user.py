@@ -3,10 +3,12 @@ import logging
 from uuid import UUID
 
 from app.models.user import User
-from app.schemas.user import CreateUser
+from app.schemas.user import CreateUser , UpdateUser
 from app.core.security import SecurityService
 from app.repository.interface.user_repository_interface import UserRepositoryInterface
 from app.services.interface.user import UserServiceInterface
+from app.core.exceptions import UserNotFound
+
 
 logger = logging.getLogger(__name__)
 
@@ -22,16 +24,8 @@ class UserService(UserServiceInterface):
             extra={"email": user.email}
         )
 
-        existing_user = await self.user_repo.get_by_email(user.email)
 
-        if existing_user:
-            logger.warning(
-                "User registration failed: email already exists",
-                extra={"email": user.email}
-            )
-            raise ValueError("Email already registered")
-
-        user.password_hash = SecurityService.hash_password(user.password_hash)
+        user.password_hash = SecurityService.hash_password(user.password)
 
         created_user = await self.user_repo.create(user)
 
@@ -58,7 +52,7 @@ class UserService(UserServiceInterface):
                 "User not found",
                 extra={"user_id": str(user_id)}
             )
-            raise ValueError("User not found")
+            raise UserNotFound()
 
         return user
 
@@ -70,7 +64,7 @@ class UserService(UserServiceInterface):
 
         return await self.user_repo.get_by_email(email)
 
-    async def update_user(self, user_id: UUID, data: dict) -> User:
+    async def update_user(self, user_id: UUID, data: UpdateUser) -> User:
         logger.info(
             "Updating user",
             extra={"user_id": str(user_id)}
@@ -83,10 +77,13 @@ class UserService(UserServiceInterface):
                 "User update failed: user not found",
                 extra={"user_id": str(user_id)}
             )
-            raise ValueError("User not found")
+            raise UserNotFound()
+        allowed_fields = {
+            "first_name", "last_name"
+        }
 
         for field, value in data.items():
-            if value is not None:
+            if field in allowed_fields and value is not None:
                 setattr(user, field, value)
 
         updated_user = await self.user_repo.update(user)
@@ -114,7 +111,7 @@ class UserService(UserServiceInterface):
                 "User deletion failed: user not found",
                 extra={"user_id": str(user_id)}
             )
-            raise ValueError("User not found")
+            raise UserNotFound()
 
         await self.user_repo.delete(user)
 
