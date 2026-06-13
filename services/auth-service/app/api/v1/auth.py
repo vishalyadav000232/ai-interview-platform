@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from app.schemas.user import CreateUser
 from app.services.interface.auth import AuthServiceInterface
 from app.dependencies.service_deps import get_auth_service
-
+from app.schemas.auth import RegisterResponse
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
@@ -22,7 +22,7 @@ async def test_route():
     }
 
 
-@router.post("/register", status_code=status.HTTP_201_CREATED)
+@router.post("/register", status_code=status.HTTP_201_CREATED , response_model=RegisterResponse)
 async def register(
     user: CreateUser,
     auth_service: AuthServiceInterface = Depends(get_auth_service)
