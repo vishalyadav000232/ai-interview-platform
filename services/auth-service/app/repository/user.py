@@ -22,7 +22,7 @@ class UserRepository(UserRepositoryInterface):
             new_user = User(
                 first_name=user.first_name,
                 email=user.email,
-                password_hash=user.password_hash
+                password_hash=user.password
             )
 
             self.db.add(new_user)

@@ -25,7 +25,7 @@ class UserService(UserServiceInterface):
         )
 
 
-        user.password_hash = SecurityService.hash_password(user.password)
+        user.password = SecurityService.hash_password(user.password)
 
         created_user = await self.user_repo.create(user)
 
