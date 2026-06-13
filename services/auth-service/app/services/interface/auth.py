@@ -12,4 +12,9 @@ class AuthServiceInterface(ABC):
     @abstractmethod
     async def login(self , login_data: OAuth2PasswordRequestForm)->User:
         raise NotImplementedError
+    @abstractmethod
+    async def refresh(self, refresh_token: str) -> User:
+        raise NotImplementedError
+    
+    
         

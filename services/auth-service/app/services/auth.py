@@ -160,3 +160,11 @@ class AuthService(AuthServiceInterface):
         except Exception:
             logger.exception("Unexpected error during token refresh")
             raise
+        
+    async def logout(self, refresh_token: str | None):
+        if not refresh_token:
+            return True
+
+        await self.token_service.revoke_refresh_token(refresh_token)
+
+        return True

@@ -186,3 +186,36 @@ async def refresh_token(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
         )
+        
+@router.post("/logout")
+async def logout(
+    response: Response,
+    refresh_token: str | None = Cookie(default=None),
+    token_service: TokenServiceInterface = Depends(get_token_service),
+):
+    try:
+        if refresh_token:
+            await token_service.revoke_refresh_token(refresh_token)
+
+        response.delete_cookie(
+            key="refresh_token",
+            httponly=True,
+            secure=False,
+            samesite="lax"
+        )
+
+        return {
+            "success": True,
+            "message": "Logged out successfully"
+        }
+
+    except AppException:
+        raise
+
+    except Exception:
+        logger.exception("Unexpected error in logout route")
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error"
+        )
