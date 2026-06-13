@@ -31,7 +31,7 @@ class UserService(UserServiceInterface):
             )
             raise ValueError("Email already registered")
 
-        user.password = SecurityService.hash_password(user.password)
+        user.password_hash = SecurityService.hash_password(user.password_hash)
 
         created_user = await self.user_repo.create(user)
 

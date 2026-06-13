@@ -9,7 +9,7 @@ class CreateUser(BaseModel):
     id : UUID
     first_name : str
     email : EmailStr
-    password : str
+    password_hash : str
     
     
     
