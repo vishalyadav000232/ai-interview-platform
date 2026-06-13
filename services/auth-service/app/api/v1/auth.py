@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status , Cookie
 from fastapi.responses import Response
 from app.core.exceptions import AppException
 from app.schemas.user import CreateUser 
@@ -134,3 +134,55 @@ async def login(
             "token_type": "bearer"
         }
     }
+    
+    
+@router.post("/refresh")
+async def refresh_token(
+    response: Response,
+    refresh_token: str | None = Cookie(default=None),
+    auth_service: AuthServiceInterface = Depends(get_auth_service),
+    token_service: TokenServiceInterface = Depends(get_token_service),
+):
+    try:
+        user = await auth_service.refresh(refresh_token)
+
+        access_token = await token_service.create_access_token(user.id)
+        new_refresh_token = await token_service.create_refresh_token(user.id)
+
+        response.set_cookie(
+            key="refresh_token",
+            value=new_refresh_token,
+            httponly=True,
+            secure=False,      
+            samesite="lax",
+            max_age=7 * 24 * 60 * 60
+        )
+
+        logger.info(
+            "Token refreshed successfully",
+            extra={
+                "user_id": str(user.id)
+            }
+        )
+
+        return {
+            "success": True,
+            "message": "Token refreshed successfully",
+            "data": {
+                "access_token": access_token,
+                "token_type": "bearer"
+            }
+        }
+
+    except AppException:
+        raise
+
+    except Exception:
+        logger.exception(
+            "Unexpected error in refresh route"
+        )
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error"
+        )

@@ -5,8 +5,17 @@ from app.schemas.user import CreateUser
 from app.models.user import User
 from app.services.interface.auth import AuthServiceInterface
 from fastapi.security import OAuth2PasswordRequestForm
-from app.core.exceptions import UserInactiveException , InvalidCredentialsException , UserAlreadyExistException
+from app.core.exceptions import( 
+                                RefreshTokenMissingException , InvalidCredentialsException , 
+                                AppException,
+                                UserAlreadyExistException , 
+                                InvalidRefreshTokenException
+                                )
 from app.core.security import SecurityService
+
+
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -117,3 +126,37 @@ class AuthService(AuthServiceInterface):
         )
 
         return user
+    
+
+
+    async def refresh(self, refresh_token: str) -> User:
+        try:
+            if not refresh_token:
+                logger.warning("Refresh token missing from cookies")
+                raise RefreshTokenMissingException()
+
+            payload = await self.token_service.verify_refresh_token(refresh_token)
+
+            user_id = payload.get("sub")
+
+            if not user_id:
+                logger.warning("User id missing in refresh token payload")
+                raise InvalidRefreshTokenException()
+
+            user = await self.user_service.get_user_by_id(
+                user_id=user_id
+            )
+
+            logger.info(
+                "Refresh token verified successfully",
+                extra={"user_id": user_id}
+            )
+
+            return user
+
+        except AppException:
+            raise
+
+        except Exception:
+            logger.exception("Unexpected error during token refresh")
+            raise

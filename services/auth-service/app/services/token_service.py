@@ -117,7 +117,7 @@ class TokenService(TokenServiceInterface):
             raise ValueError("missing token")
         
         try:
-            payload = jwt.decode(token  , self.secret_key , algorithm= [self.algorithm])
+            payload =  jwt.decode(token  , self.secret_key , algorithms= [self.algorithm])
             
             actual_type = payload.get("type")
             user_id = payload.get("sub")
@@ -175,8 +175,10 @@ class TokenService(TokenServiceInterface):
                 
                 
         )
+        
+        token_hash = self.hash_token(token=token)
             
-        is_valid = await self.refresh_service.validate_token(jti=jti)
+        is_valid = await self.refresh_service.validate_token(jti=jti , token_hash=token_hash)
         
         
         if not is_valid:
@@ -184,7 +186,8 @@ class TokenService(TokenServiceInterface):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Refresh token revoked or expired"
         )
-            return payload
+            
+        return payload
         
         
     

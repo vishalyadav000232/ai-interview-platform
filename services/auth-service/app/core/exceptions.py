@@ -43,3 +43,21 @@ class UserInactiveException(AppException):
             status_code=403,
             error_code="USER_INACTIVE"
         )
+    
+
+class RefreshTokenMissingException(AppException):
+    def __init__(self):
+        super().__init__(
+            message="Refresh token missing",
+            status_code=401,
+            error_code="REFRESH_TOKEN_MISSING"
+        )
+
+
+class InvalidRefreshTokenException(AppException):
+    def __init__(self):
+        super().__init__(
+            message="Invalid or expired refresh token",
+            status_code=401,
+            error_code="INVALID_REFRESH_TOKEN"
+        )
