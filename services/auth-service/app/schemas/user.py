@@ -8,6 +8,7 @@ from pydantic import BaseModel, EmailStr, Field, ConfigDict
 class UserRole(str, Enum):
     USER = "USER"
     ADMIN = "ADMIN"
+    STUDENT = "STUDENT"
 
 
 class CreateUser(BaseModel):

@@ -112,6 +112,7 @@ class TokenService(TokenServiceInterface):
             ) from error
         
     async def verify_token(self , token : str , token_type : str)-> dict:
+        print(token)
         if not token:
             logger.warning("token are missing .")
             raise ValueError("missing token")
@@ -121,6 +122,9 @@ class TokenService(TokenServiceInterface):
             
             actual_type = payload.get("type")
             user_id = payload.get("sub")
+            
+            logger.info(f"actuval type : {actual_type}")
+            logger.info(f"token type : {token_type}")
             
             if actual_type != token_type:
                 logger.warning(
