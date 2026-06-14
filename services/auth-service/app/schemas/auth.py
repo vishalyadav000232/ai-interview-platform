@@ -1,10 +1,13 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr , ConfigDict
 
 
 class AuthUserResponse(BaseModel):
+    model_config = ConfigDict(
+        from_attributes=True
+    )
     id: UUID
     first_name: str
     last_name: str | None = None
@@ -13,13 +16,10 @@ class AuthUserResponse(BaseModel):
     is_email_verified: bool
     created_at: datetime
 
-    class Config:
-        from_attributes = True
         
 class DataReasponse(BaseModel):
     user : AuthUserResponse
-    access_token : str
-    token_type : str | None = None
+   
 
 
 class RegisterResponse(BaseModel):
@@ -30,5 +30,7 @@ class RegisterResponse(BaseModel):
 class LoginResponse(BaseModel):
     success : bool
     message: str
+    access_token : str
+    token_type : str | None = None
     data : DataReasponse
     

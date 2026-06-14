@@ -132,6 +132,8 @@ async def login(
     return {
         "success": True,
         "message": "Login successful",
+        "access_token": access_token,
+        "token_type": "bearer",
         "data": {
             "user": user,
             "access_token": access_token,
@@ -147,6 +149,7 @@ async def refresh_token(
     auth_service: AuthServiceInterface = Depends(get_auth_service),
     token_service: TokenServiceInterface = Depends(get_token_service),
 ):
+    
     try:
         user = await auth_service.refresh(refresh_token)
 
@@ -179,6 +182,9 @@ async def refresh_token(
         }
 
     except AppException:
+        raise
+    
+    except HTTPException:
         raise
 
     except Exception:

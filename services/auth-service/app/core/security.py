@@ -9,7 +9,7 @@ from app.core.config import settings
 class SecurityService:
 
     pwd_context = CryptContext(
-        schemes=["bcrypt"],
+        schemes=["argon2"],
         deprecated="auto"
     )
 

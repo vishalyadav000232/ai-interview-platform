@@ -12,6 +12,7 @@ from app.core.exceptions import(
                                 InvalidRefreshTokenException
                                 )
 from app.core.security import SecurityService
+from fastapi import HTTPException
 
 
 
@@ -157,6 +158,9 @@ class AuthService(AuthServiceInterface):
             return user
 
         except AppException:
+            raise
+        
+        except HTTPException:
             raise
 
         except Exception:

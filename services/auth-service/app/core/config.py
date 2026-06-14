@@ -3,6 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     DATABASE_URL: str
+    TEST_DATABASE_URL: str | None = None
     JWT_SECRATE_KEY :str = 'D'
     JWT_ALGORITHM :str = 'HS256'
     ACCESS_TOKEN_EXPIRE_MINUTS : int = 30
