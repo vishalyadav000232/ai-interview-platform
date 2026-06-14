@@ -112,7 +112,7 @@ class TokenService(TokenServiceInterface):
             ) from error
         
     async def verify_token(self , token : str , token_type : str)-> dict:
-        print(token)
+        
         if not token:
             logger.warning("token are missing .")
             raise ValueError("missing token")
@@ -257,7 +257,7 @@ class TokenService(TokenServiceInterface):
         if not user_id:
             raise ValueError("user_id is missing")
 
-        revoked_count = await self.refresh_service.revoke_all_user_tokens(
+        revoked_count = await self.refresh_service.revoke_all_for_user(
             user_id=user_id
         )
 

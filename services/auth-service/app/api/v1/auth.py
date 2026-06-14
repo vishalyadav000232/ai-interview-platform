@@ -12,7 +12,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from app.models.user import User
 from app.dependencies.auth import get_current_user
 from app.schemas.user import UserResponse
-
+from app.core.exceptions import RefreshTokenMissingException
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
@@ -203,9 +203,13 @@ async def logout(
     refresh_token: str | None = Cookie(default=None),
     token_service: TokenServiceInterface = Depends(get_token_service),
 ):
+    
+   
     try:
-        if refresh_token:
-            await token_service.revoke_refresh_token(refresh_token)
+        if not refresh_token:
+            raise RefreshTokenMissingException()
+        
+        await token_service.revoke_refresh_token(refresh_token)
 
         response.delete_cookie(
             key="refresh_token",
@@ -221,6 +225,9 @@ async def logout(
 
     except AppException:
         raise
+    
+    except HTTPException:
+        raise
 
     except Exception:
         logger.exception("Unexpected error in logout route")
@@ -235,3 +242,25 @@ async def get_me(
     current_user: User = Depends(get_current_user)
 ):
     return current_user
+
+@router.post("/logout-all")
+async def logout_all_devices(
+    response: Response,
+    current_user: User = Depends(get_current_user),
+    token_service: TokenServiceInterface = Depends(get_token_service),
+):
+    revoked_count = await token_service.revoke_all_user_sessions(
+        current_user.id
+    )
+
+    response.delete_cookie(
+        key="refresh_token"
+    )
+
+    return {
+        "success": True,
+        "message": "Logged out from all devices successfully",
+        "data": {
+            "revoked_sessions": revoked_count
+        }
+    }

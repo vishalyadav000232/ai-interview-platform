@@ -64,3 +64,44 @@ async def test_refresh_after_logout(client):
     response = await client.post("/auth/refresh")
 
     assert response.status_code == 401
+
+
+
+
+
+
+
+@pytest.mark.asyncio
+async def test_logout_all_devices(client):
+    await client.post(
+        "/auth/register",
+        json={
+            "first_name": "vishal",
+            "last_name": "yadav",
+            "email": "logoutall@example.com",
+            "password": "vishal123"
+        }
+    )
+
+    login_response = await client.post(
+        "/auth/login",
+        data={
+            "username": "logoutall@example.com",
+            "password": "vishal123"
+        }
+    )
+
+    access_token = login_response.json()["access_token"]
+
+    response = await client.post(
+        "/auth/logout-all",
+        headers={
+            "Authorization": f"Bearer {access_token}"
+        }
+    )
+
+    assert response.status_code == 200
+
+    refresh_response = await client.post("/auth/refresh")
+
+    assert refresh_response.status_code == 401

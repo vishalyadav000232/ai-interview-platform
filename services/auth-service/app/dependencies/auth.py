@@ -17,7 +17,6 @@ async def get_current_user(
     token_service: TokenServiceInterface = Depends(get_token_service),
     user_service: UserServiceInterface = Depends(get_user_service),
 ):
-    print("token in get curent user ",token)
     try:
         payload = await token_service.verify_access_token(token=token)
 

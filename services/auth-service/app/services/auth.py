@@ -169,7 +169,7 @@ class AuthService(AuthServiceInterface):
         
     async def logout(self, refresh_token: str | None):
         if not refresh_token:
-            return True
+            return RefreshTokenMissingException()
 
         await self.token_service.revoke_refresh_token(refresh_token)
 
