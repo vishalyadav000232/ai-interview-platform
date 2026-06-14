@@ -10,7 +10,9 @@ services:
     volumes:
       - ./services/auth-service/app:/app/app
       - ./services/auth-service/migrations:/app/migrations
-      - ./services/auth-serivce/alembic.ini:/app.alembic.ini
+      - ./services/auth-service/alembic.ini:/app.alembic.ini
+      - ./services/auth-service/tests:/app/tests
+      - ./services/auth-service/pytest.ini:/app/pytest.ini
     depends_on:
       - postgres
 

@@ -3,13 +3,15 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 
 from app.api.router import api_router
 from app.core.config import settings
 from app.core.logging import setup_logging
 from app.core.exception_handler import register_exception_handlers
+from app.db.session import engine, AsyncSessionLocal
 
-# Configure Logging
+
 setup_logging()
 
 logger = logging.getLogger(__name__)
@@ -17,28 +19,27 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Startup Events
-    """
-
     logger.info("Starting Auth Service")
 
-    # Database Connection Check
-    # Redis Connection Check
-    # Kafka Connection Check
-    # Background Workers Start
+    try:
+        async with AsyncSessionLocal() as session:
+            await session.execute(text("SELECT 1"))
+
+        logger.info("Database connected successfully")
+
+    except Exception:
+        logger.exception("Database connection failed")
+        raise
+
+    logger.info("Auth Service started successfully")
 
     yield
 
-    """
-    Shutdown Events
-    """
-
     logger.info("Shutting down Auth Service")
 
-    # Close DB Pool
-    # Close Redis
-    # Stop Workers
+    await engine.dispose()
+
+    logger.info("Database engine disposed successfully")
 
 
 app = FastAPI(
@@ -50,8 +51,8 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
-# Global Exception Handlers
 register_exception_handlers(app)
+
 
 # CORS
 # app.add_middleware(
@@ -62,18 +63,15 @@ register_exception_handlers(app)
 #     allow_headers=["*"],
 # )
 
-# API Routes
+
 app.include_router(api_router)
 
 
-@app.get(
-    "/health",
-    tags=["Health"]
-)
+@app.get("/health", tags=["Health"])
 async def health_check():
     return {
         "success": True,
         "service": "Auth Service",
         "version": "1.0.0",
-        "status": "healthy"
+        "status": "healthy",
     }

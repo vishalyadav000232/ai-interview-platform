@@ -9,3 +9,6 @@ pydantic[email]
 python-jose[cryptography]
 passlib
 python-multipart
+pytest
+pytest-asyncio
+httpx

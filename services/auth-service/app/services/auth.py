@@ -142,6 +142,8 @@ class AuthService(AuthServiceInterface):
             if not user_id:
                 logger.warning("User id missing in refresh token payload")
                 raise InvalidRefreshTokenException()
+            
+            await self.token_service.revoke_refresh_token(refresh_token)
 
             user = await self.user_service.get_user_by_id(
                 user_id=user_id

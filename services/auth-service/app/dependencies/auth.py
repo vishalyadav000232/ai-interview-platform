@@ -18,7 +18,7 @@ async def get_current_user(
     user_service: UserServiceInterface = Depends(get_user_service),
 ):
     try:
-        payload = token_service.verify_access_token(token=token)
+        payload = await token_service.verify_access_token(token=token)
 
         user_id = payload.get("sub")
 
