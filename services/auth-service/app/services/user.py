@@ -126,12 +126,7 @@ class UserService(UserServiceInterface):
         
         user = await self.get_user_by_id(user_id=user_id)
         
-        if user.is_email_verified:
-            logger.info(
-                "User email already verified",
-                extra={"user_id": str(user.id)}
-            )
-            return user
+        
                 
         updated_user = await self.update_user(
             user_id=user.id ,

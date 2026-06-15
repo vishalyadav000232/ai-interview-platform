@@ -19,5 +19,12 @@ class AuthServiceInterface(ABC):
     async def change_password(self ,user : User ,  old_password : str , new_password : str)->None:
         raise NotImplementedError
     
-    
+    @abstractmethod
+    async def verify_email(self,token: str) -> User:
+        pass
+    @abstractmethod
+    async def resend_verification_email(self,user: User) -> str:
+        pass
+        
+        
         
