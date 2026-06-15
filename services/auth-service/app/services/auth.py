@@ -174,3 +174,32 @@ class AuthService(AuthServiceInterface):
         await self.token_service.revoke_refresh_token(refresh_token)
 
         return True
+    
+    async def change_password(self , user : User,  old_password : str , new_password : str)->None:
+        
+        if not self.security_service.verify_password(old_password  ,user.password_hash ):
+            logger.warning(
+                "Old password is incorrect",
+                extra={
+                    "user_id": user.id
+                }
+            )
+            raise InvalidCredentialsException()
+        
+        user.password_hash = self.security_service.hash_password(new_password)
+        
+        await self.user_service.update_user(user_id=user.id ,data= {
+            "password_hash": user.password_hash
+        })
+        
+        logger.info(
+            "Password update successfully ",
+            extra={
+                "user_id" : user.id
+            }
+        )
+        
+        
+        await self.token_service.revoke_all_user_sessions(user_id=user.id)
+        
+        

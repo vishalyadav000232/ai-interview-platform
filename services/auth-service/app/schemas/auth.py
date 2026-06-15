@@ -1,7 +1,7 @@
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, EmailStr , ConfigDict
+from pydantic import BaseModel, EmailStr , ConfigDict , Field
 
 
 class AuthUserResponse(BaseModel):
@@ -33,4 +33,9 @@ class LoginResponse(BaseModel):
     access_token : str
     token_type : str | None = None
     data : DataReasponse
+    
+
+class ChangePassword(BaseModel):
+    old_password : str = Field( min_length=6 ,max_length=30)
+    new_password : str = Field( min_length=6 ,max_length=30)
     

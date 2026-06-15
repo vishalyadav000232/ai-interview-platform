@@ -15,6 +15,9 @@ class AuthServiceInterface(ABC):
     @abstractmethod
     async def refresh(self, refresh_token: str) -> User:
         raise NotImplementedError
+    @abstractmethod
+    async def change_password(self ,user : User ,  old_password : str , new_password : str)->None:
+        raise NotImplementedError
     
     
         

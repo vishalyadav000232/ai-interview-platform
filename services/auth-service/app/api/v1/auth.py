@@ -7,7 +7,7 @@ from app.schemas.user import CreateUser
 from app.services.interface.auth import AuthServiceInterface
 from app.services.interface.token_service_interface import TokenServiceInterface
 from app.dependencies.service_deps import get_auth_service , get_token_service
-from app.schemas.auth import RegisterResponse  , LoginResponse
+from app.schemas.auth import RegisterResponse  , LoginResponse , ChangePassword
 from fastapi.security import OAuth2PasswordRequestForm
 from app.models.user import User
 from app.dependencies.auth import get_current_user
@@ -264,3 +264,27 @@ async def logout_all_devices(
             "revoked_sessions": revoked_count
         }
     }
+    
+@router.post('/change-password')
+async def change_password(
+    response : Response,
+    payload : ChangePassword,
+    curret_user : User = Depends(get_current_user),
+    auth_service : AuthServiceInterface = Depends(get_auth_service)
+):
+    await auth_service.change_password(
+        user=curret_user,
+        new_password=payload.new_password ,
+        old_password=payload.old_password
+        
+    )
+    
+    response.delete_cookie(
+        key="refresh_token"
+    )
+    
+
+    return {
+            "success": True,
+            "message": "Password changed successfully"
+            }
