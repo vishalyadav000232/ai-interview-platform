@@ -1,6 +1,6 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status , Cookie
+from fastapi import APIRouter, Depends, HTTPException, status , Cookie , Query
 from fastapi.responses import Response
 from app.core.exceptions import AppException
 from app.schemas.user import CreateUser 
@@ -50,10 +50,21 @@ async def register(
         access_token = await token_service.create_access_token(created_user.id)
         refresh_token = await token_service.create_refresh_token(created_user.id)
         
+        email_verification_token = await token_service.create_email_verification_token(
+            created_user.id
+        )
+
+        verification_link = (
+            "http://localhost:8001/auth/verify-email"
+            f"?token={email_verification_token}"
+        )
+
         logger.info(
-            "refresh_token success fully set into cookies " ,
+            "Email verification link generated",
             extra={
-                "refresh" : refresh_token
+                "user_id": str(created_user.id),
+                "email": created_user.email,
+                "verification_link": verification_link
             }
         )
         
@@ -67,13 +78,22 @@ async def register(
     )
         
         
+        logger.info(
+            "refresh_token success fully set into cookies " ,
+            extra={
+                "refresh" : refresh_token
+            }
+        )
+        
 
         return {
             "success": True,
             "message": "User registered successfully",
             "data": {
                 "user" : created_user,
-                "access_token" : access_token
+                "access_token" : access_token,
+                "verification_link": verification_link
+                
             }
         }
         
@@ -288,3 +308,37 @@ async def change_password(
             "success": True,
             "message": "Password changed successfully"
             }
+    
+    
+    
+@router.post("/verify-email")
+async def verify_email(
+    token :str=  Query(...) ,
+    auth_sevice :AuthServiceInterface = Depends(get_auth_service)
+):
+    
+    if not token:
+        raise ValueError("token are missing..")
+    
+    await auth_sevice.verify_email(token=token)
+    
+    return {
+        "success": True,
+        "message": "Email verified successfully"
+    }
+    
+@router.post("/resend-verification")
+async def resend_verification(
+    current_user: User = Depends(get_current_user),
+    auth_service: AuthServiceInterface = Depends(get_auth_service)
+):
+
+    verification_link = await auth_service.resend_verification_email(
+        user=current_user
+    )
+
+    return {
+        "success": True,
+        "message": "Verification email sent successfully",
+        "verification_link": verification_link
+    }

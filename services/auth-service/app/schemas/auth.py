@@ -19,6 +19,7 @@ class AuthUserResponse(BaseModel):
         
 class DataReasponse(BaseModel):
     user : AuthUserResponse
+    verification_link : str
    
 
 

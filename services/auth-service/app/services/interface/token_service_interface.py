@@ -35,7 +35,7 @@ class TokenServiceInterface(ABC):
     async def create_email_verification_token(self, user_id : UUID |str)-> str:
         raise NotImplementedError
     @abstractmethod
-    async def verify_email_verificatio_token(self , token : str)-> dict:
+    async def verify_email_verification_token(self , token : str)-> dict:
         raise NotImplementedError
     
         
