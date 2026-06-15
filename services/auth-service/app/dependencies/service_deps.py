@@ -18,6 +18,9 @@ from app.services.refresh_token_service import RefreshTokenService
 from app.services.auth import AuthService
 
 
+from app.services.interface.email_service import EmailServiceInterface
+from app.services.email_service import EmailService
+
 logger = logging.getLogger(__name__)
 
 
@@ -52,3 +55,8 @@ def get_auth_service(
         user_service=user_service,
         token_service=token_service,
     )
+    
+    
+
+def get_email_service()->EmailServiceInterface:
+    return EmailService()

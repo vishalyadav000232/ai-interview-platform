@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     JWT_ALGORITHM :str = 'HS256'
     ACCESS_TOKEN_EXPIRE_MINUTS : int = 30
     REFRESH_TOKEN_EXPIRE_DAYS : int = 7
+    RESEND_API_KEY: str
+    EMAIL_FROM: str = "AI Interview <onboarding@resend.dev>"
+    AUTH_SERVICE_BASE_URL:str
 
     model_config = SettingsConfigDict(
         env_file=".env",

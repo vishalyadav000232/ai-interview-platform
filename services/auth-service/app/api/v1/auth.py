@@ -1,18 +1,23 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status , Cookie , Query
+from fastapi import APIRouter, Depends, HTTPException, status , Cookie , Query , BackgroundTasks
 from fastapi.responses import Response
 from app.core.exceptions import AppException
 from app.schemas.user import CreateUser 
 from app.services.interface.auth import AuthServiceInterface
 from app.services.interface.token_service_interface import TokenServiceInterface
-from app.dependencies.service_deps import get_auth_service , get_token_service
+from app.dependencies.service_deps import get_auth_service , get_token_service , get_email_service
 from app.schemas.auth import RegisterResponse  , LoginResponse , ChangePassword
 from fastapi.security import OAuth2PasswordRequestForm
 from app.models.user import User
 from app.dependencies.auth import get_current_user
 from app.schemas.user import UserResponse
 from app.core.exceptions import RefreshTokenMissingException
+
+
+from app.services.interface.email_service import EmailServiceInterface
+
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
@@ -33,8 +38,10 @@ async def test_route():
 async def register(
     response : Response,
     user: CreateUser,
+    backgroung_task :BackgroundTasks,
     auth_service: AuthServiceInterface = Depends(get_auth_service),
-    token_service : TokenServiceInterface = Depends(get_token_service)
+    token_service : TokenServiceInterface = Depends(get_token_service),
+    email_service : EmailServiceInterface = Depends(get_email_service)
 ):
     try:
         created_user = await auth_service.register(user_data=user)
@@ -68,6 +75,12 @@ async def register(
             }
         )
         
+        backgroung_task.add_task(
+            email_service.send_email_verification,
+            created_user.email,
+            verification_link
+        )
+        
         response.set_cookie(
         key="refresh_token",
         value=refresh_token,
@@ -80,9 +93,7 @@ async def register(
         
         logger.info(
             "refresh_token success fully set into cookies " ,
-            extra={
-                "refresh" : refresh_token
-            }
+           
         )
         
 
@@ -325,11 +336,20 @@ async def verify_email(
 
 @router.post("/resend-verification", status_code=status.HTTP_200_OK)
 async def resend_verification(
+    background_task : BackgroundTasks,
     current_user: User = Depends(get_current_user),
-    auth_service: AuthServiceInterface = Depends(get_auth_service)
+    auth_service: AuthServiceInterface = Depends(get_auth_service),
+    email_service : EmailServiceInterface = Depends(get_email_service)
 ):
     verification_link = await auth_service.resend_verification_email(
         user=current_user
+    )
+    
+    
+    background_task.add_task(
+        email_service.send_email_verification,
+        current_user.email,
+        verification_link
     )
 
     return {
@@ -337,5 +357,31 @@ async def resend_verification(
         "message": "Verification email sent successfully",
         "data": {
             "verification_link": verification_link
+        }
+    }
+    
+
+
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.db.session import get_db
+
+@router.patch("/dev/me/unverify-email", status_code=status.HTTP_200_OK)
+async def unverify_my_email_for_testing(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
+    current_user.is_email_verified = False
+
+    db.add(current_user)
+    await db.commit()
+    await db.refresh(current_user)
+
+    return {
+        "success": True,
+        "message": "Email verification status set to false for testing",
+        "data": {
+            "id": str(current_user.id),
+            "email": current_user.email,
+            "is_email_verified": current_user.is_email_verified
         }
     }
