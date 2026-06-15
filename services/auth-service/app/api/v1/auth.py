@@ -310,29 +310,24 @@ async def change_password(
             }
     
     
-    
-@router.post("/verify-email")
+@router.get("/verify-email", status_code=status.HTTP_200_OK)
 async def verify_email(
-    token :str=  Query(...) ,
-    auth_sevice :AuthServiceInterface = Depends(get_auth_service)
+    token: str = Query(...),
+    auth_service: AuthServiceInterface = Depends(get_auth_service)
 ):
-    
-    if not token:
-        raise ValueError("token are missing..")
-    
-    await auth_sevice.verify_email(token=token)
-    
+    await auth_service.verify_email(token=token)
+
     return {
         "success": True,
         "message": "Email verified successfully"
     }
-    
-@router.post("/resend-verification")
+
+
+@router.post("/resend-verification", status_code=status.HTTP_200_OK)
 async def resend_verification(
     current_user: User = Depends(get_current_user),
     auth_service: AuthServiceInterface = Depends(get_auth_service)
 ):
-
     verification_link = await auth_service.resend_verification_email(
         user=current_user
     )
@@ -340,5 +335,7 @@ async def resend_verification(
     return {
         "success": True,
         "message": "Verification email sent successfully",
-        "verification_link": verification_link
+        "data": {
+            "verification_link": verification_link
+        }
     }

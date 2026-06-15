@@ -304,14 +304,14 @@ class TokenService(TokenServiceInterface):
         if not token:
             raise ValueError("email verification token is missing")
 
-        payload = self.verify_token(
+        payload = await self.verify_token(
             token=token,
             token_type="email_verification"
         )
 
         logger.info(
             "Email verification token verified successfully",
-            extra={"user_id": payload.get("sub")}
+           
         )
 
         return payload

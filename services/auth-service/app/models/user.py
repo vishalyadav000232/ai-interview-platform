@@ -23,7 +23,7 @@ class User(Base):
     
     auth_provider : Mapped[str] = mapped_column(String(50) , default="LOCAL")
     
-    is_email_verified : Mapped[bool] = mapped_column(Boolean, default=True)
+    is_email_verified : Mapped[bool] = mapped_column(Boolean, default=False)
     is_active:Mapped[bool]= mapped_column(Boolean , default=False)
     is_deleted: Mapped[bool] = mapped_column(Boolean, default=False)
 

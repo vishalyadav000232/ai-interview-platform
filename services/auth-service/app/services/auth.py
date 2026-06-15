@@ -9,7 +9,10 @@ from app.core.exceptions import(
                                 RefreshTokenMissingException , InvalidCredentialsException , 
                                 AppException,
                                 UserAlreadyExistException , 
-                                InvalidRefreshTokenException
+                                InvalidRefreshTokenException,
+                                EmailVerificationTokenMissing,
+                                EmailAlreadyVerifiedException,
+                                InvalidEmailVerificationTokenException
                                 )
 from app.core.security import SecurityService
 from fastapi import HTTPException
@@ -202,15 +205,13 @@ class AuthService(AuthServiceInterface):
         
         await self.token_service.revoke_all_user_sessions(user_id=user.id)
         
-        
-        
+    
     async def verify_email(self, token: str) -> User:
-
         if not token:
             logger.warning("Email verification token is missing")
-            raise ValueError("email_verification_token_missing")
+            raise EmailVerificationTokenMissing()
 
-        payload = await self.token_service.create_email_verification_token(
+        payload = await self.token_service.verify_email_verification_token(
             token=token
         )
 
@@ -218,7 +219,7 @@ class AuthService(AuthServiceInterface):
 
         if not user_id:
             logger.warning("User id missing in email verification token")
-            raise ValueError("invalid_email_verification_token")
+            raise InvalidEmailVerificationTokenException()
 
         user = await self.user_service.get_user_by_id(user_id=user_id)
 
@@ -229,9 +230,7 @@ class AuthService(AuthServiceInterface):
             )
             return user
 
-        verified_user = await self.user_service.verify_email(
-            user_id=user.id
-        )
+        verified_user = await self.user_service.verify_email(user_id=user.id)
 
         logger.info(
             "User email verified successfully",
@@ -239,14 +238,11 @@ class AuthService(AuthServiceInterface):
         )
 
         return verified_user
-    
-    async def resend_verification_email(self,user: User) -> str:
-
+        
+        
+    async def resend_verification_email(self, user: User) -> str:
         if user.is_email_verified:
-            raise HTTPException(
-                status_code=400,
-                detail="Email already verified"
-            )
+            raise EmailAlreadyVerifiedException()
 
         token = await self.token_service.create_email_verification_token(
             user_id=user.id
@@ -259,10 +255,10 @@ class AuthService(AuthServiceInterface):
 
         logger.info(
             "Email verification link generated",
-            extra={
-                "user_id": str(user.id),
-                "verification_link": verification_link
-            }
+            extra={"user_id": str(user.id)}
         )
 
         return verification_link
+            
+            
+    

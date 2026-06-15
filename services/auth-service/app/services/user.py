@@ -79,12 +79,13 @@ class UserService(UserServiceInterface):
             )
             raise UserNotFound()
         allowed_fields = {
-            "first_name", "last_name"
+            "first_name", "last_name" , "is_email_verified"
         }
 
         for field, value in data.items():
             if field in allowed_fields and value is not None:
                 setattr(user, field, value)
+            logger.warning("field are not allowed")
 
         updated_user = await self.user_repo.update(user)
 

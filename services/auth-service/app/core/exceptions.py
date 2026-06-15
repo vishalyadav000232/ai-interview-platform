@@ -69,3 +69,19 @@ class EmailVerificationTokenMissing(AppException):
             error_code="INVALID_EMAIL_VERIFICATION_TOKEN"
         
         )
+    
+class EmailAlreadyVerifiedException(AppException):
+    def __init__(self):
+        super().__init__(
+            message="Email already verified",
+            status_code=400
+        )
+    
+class InvalidEmailVerificationTokenException(AppException):
+    def __init__(self):
+        super().__init__(
+            message="Invalid emial verification token",
+            status_code=400,
+            
+            
+        )
