@@ -315,3 +315,45 @@ class TokenService(TokenServiceInterface):
         )
 
         return payload
+    
+    
+    async def create_password_reset_token(self, user_id : UUID | str)->str:
+        if not user_id:
+            raise ValueError("user-id is missing")
+        
+        now = datetime.now(timezone.utc)
+        expire = now + timedelta(minutes=15)
+        jti = str(uuid4())
+
+        payload = {
+            "sub": str(user_id),
+            "type": "password_reset",
+            "iat": now,
+            "exp": expire,
+            "jti": jti,
+        }
+        
+        token = jwt.encode(
+            payload,
+            key=self.secret_key,
+            algorithm=self.algorithm
+        )
+
+        logger.info(
+            " password reset token created successfully",
+            extra={"user_id": str(user_id), "jti": jti}
+        )
+
+        return token
+    
+    
+    async def verify_password_reset_token(self, token : str)-> dict:
+        
+        
+        payload =await  self.verify_token(token=token , token_type="password_rest")
+        
+        logger.info("password reset successfully ")
+        
+        return payload
+        
+        

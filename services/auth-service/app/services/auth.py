@@ -12,7 +12,8 @@ from app.core.exceptions import(
                                 InvalidRefreshTokenException,
                                 EmailVerificationTokenMissing,
                                 EmailAlreadyVerifiedException,
-                                InvalidEmailVerificationTokenException
+                                InvalidEmailVerificationTokenException,
+                                UserNotFound
                                 )
 from app.core.security import SecurityService
 from fastapi import HTTPException
@@ -260,5 +261,74 @@ class AuthService(AuthServiceInterface):
 
         return verification_link
             
+        
+    async def forgot_password(self, email : str)-> None:
+        
+        if not email:
+            raise ValueError("email are missing")
+        
+        user = await self.user_service.get_user_by_email(email=email)
+        
+        if not user:
+            logger.warning(
+                "user does not exist"
+            )
+            return None
+        
+        reset_token = await self.token_service.create_password_reset_token(user_id=user.id)
+        
+        reset_link = (
+        "http://localhost:8001/auth/reset-password"
+        f"?token={reset_token}"
+    )
+        logger.info(
+        "Password reset link generated",
+        extra={
+            "user_id": str(user.id),
+            "email": user.email
+        }
+    )
+        return reset_link
+    
+
+    
+    async def reset_password(self, token: str, new_password: str)-> None:
+        
+        payload = await self.token_service.verify_password_reset_token(token=token)
+        
+        user_id = payload.get("sub")
+
+        if not user_id:
+            raise InvalidCredentialsException()
+
+        user = await self.user_service.get_user_by_id(
+        user_id=user_id
+    )
+        new_password_hash = self.security_service.hash_password(
+        new_password
+    )
+        
+        await self.user_service.update_user(
+        user_id=user.id,
+        data={
+            "password_hash": new_password_hash
+        }
+    )
+        await self.token_service.revoke_all_user_sessions(
+        user_id=user.id
+    )
+        
+        logger.info(
+        "Password reset successfully",
+        extra={
+            "user_id": str(user.id)
+        }
+    )
+
+        
+       
+        
+        
+        
             
     

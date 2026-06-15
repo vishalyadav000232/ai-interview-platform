@@ -7,7 +7,7 @@ from app.schemas.user import CreateUser
 from app.services.interface.auth import AuthServiceInterface
 from app.services.interface.token_service_interface import TokenServiceInterface
 from app.dependencies.service_deps import get_auth_service , get_token_service , get_email_service
-from app.schemas.auth import RegisterResponse  , LoginResponse , ChangePassword
+from app.schemas.auth import RegisterResponse  , LoginResponse , ChangePassword , ForgotPasswordRequest , ResetPasswordRequest
 from fastapi.security import OAuth2PasswordRequestForm
 from app.models.user import User
 from app.dependencies.auth import get_current_user
@@ -384,4 +384,49 @@ async def unverify_my_email_for_testing(
             "email": current_user.email,
             "is_email_verified": current_user.is_email_verified
         }
+    }
+    
+
+@router.post("/forgot-password")
+async def forgot_password(
+    payload: ForgotPasswordRequest,
+    background_tasks: BackgroundTasks,
+    auth_service: AuthServiceInterface = Depends(get_auth_service),
+    email_service: EmailServiceInterface = Depends(get_email_service)
+):
+
+    reset_link = await auth_service.forgot_password(
+        email=payload.email
+    )
+
+    if reset_link:
+        background_tasks.add_task(
+            email_service.send_password_reset_email,
+            payload.email,
+            reset_link
+        )
+
+    return {
+        "success": True,
+        "message": "If this email exists, password reset instructions have been sent",
+        "data": {
+            "reset_link": reset_link
+        }
+    }
+    
+
+@router.post("/reset-password")
+async def reset_password(
+    payload: ResetPasswordRequest,
+    auth_service: AuthServiceInterface = Depends(get_auth_service)
+):
+
+    await auth_service.reset_password(
+        token=payload.token,
+        new_password=payload.new_password
+    )
+
+    return {
+        "success": True,
+        "message": "Password reset successfully"
     }

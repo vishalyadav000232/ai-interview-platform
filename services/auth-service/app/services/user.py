@@ -79,7 +79,7 @@ class UserService(UserServiceInterface):
             )
             raise UserNotFound()
         allowed_fields = {
-            "first_name", "last_name" , "is_email_verified"
+            "first_name", "last_name" , "is_email_verified" , "password_hash"
         }
 
         for field, value in data.items():

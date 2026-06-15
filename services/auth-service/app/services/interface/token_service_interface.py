@@ -37,5 +37,11 @@ class TokenServiceInterface(ABC):
     @abstractmethod
     async def verify_email_verification_token(self , token : str)-> dict:
         raise NotImplementedError
+    @abstractmethod
+    async def create_password_reset_token(self , user_id : UUID | str)->str:
+        raise NotImplementedError
+    @abstractmethod
+    async def verify_password_reset_token(self , token : str )-> dict:
+        raise NotImplementedError
     
         

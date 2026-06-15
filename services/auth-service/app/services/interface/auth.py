@@ -25,6 +25,14 @@ class AuthServiceInterface(ABC):
     @abstractmethod
     async def resend_verification_email(self,user: User) -> str:
         pass
+    
+    @abstractmethod
+    async def forgot_password(self , email:str)->None:
+        raise NotImplementedError
+    @abstractmethod
+    async def reset_password(self , token : str , new_password : str)->None:
+        raise NotImplementedError
+    
         
         
         
