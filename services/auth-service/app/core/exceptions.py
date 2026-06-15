@@ -61,3 +61,11 @@ class InvalidRefreshTokenException(AppException):
             status_code=401,
             error_code="INVALID_REFRESH_TOKEN"
         )
+class EmailVerificationTokenMissing(AppException):
+    def __init__(self,):
+        super().__init__(
+            message="Invalid or expired emial-verification token",
+            status_code=401,
+            error_code="INVALID_EMAIL_VERIFICATION_TOKEN"
+        
+        )

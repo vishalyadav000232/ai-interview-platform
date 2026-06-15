@@ -30,4 +30,12 @@ class TokenServiceInterface(ABC):
     @abstractmethod
     async def revoke_all_user_sessions(self, user_id: UUID | str) -> int:
         raise NotImplementedError
+    
+    @abstractmethod
+    async def create_email_verification_token(self, user_id : UUID |str)-> str:
+        raise NotImplementedError
+    @abstractmethod
+    async def verify_email_verificatio_token(self , token : str)-> dict:
+        raise NotImplementedError
+    
         

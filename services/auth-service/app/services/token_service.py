@@ -270,20 +270,48 @@ class TokenService(TokenServiceInterface):
         )
 
         return revoked_count
-
-
-
     
     
-    
-            
-            
+    async def create_email_verification_token(self, user_id: UUID | str) -> str:
+        if not user_id:
+            raise ValueError("user_id is missing")
 
+        now = datetime.now(timezone.utc)
+        expire = now + timedelta(hours=24)
+        jti = str(uuid4())
 
-        
-        
-        
-            
-            
-            
-            
+        payload = {
+            "sub": str(user_id),
+            "type": "email_verification",
+            "iat": now,
+            "exp": expire,
+            "jti": jti,
+        }
+
+        token = jwt.encode(
+            payload,
+            key=self.secret_key,
+            algorithm=self.algorithm
+        )
+
+        logger.info(
+            "Email verification token created successfully",
+            extra={"user_id": str(user_id), "jti": jti}
+        )
+
+        return token
+    async def verify_email_verification_token(self, token: str) -> dict:
+        if not token:
+            raise ValueError("email verification token is missing")
+
+        payload = self.verify_token(
+            token=token,
+            token_type="email_verification"
+        )
+
+        logger.info(
+            "Email verification token verified successfully",
+            extra={"user_id": payload.get("sub")}
+        )
+
+        return payload
