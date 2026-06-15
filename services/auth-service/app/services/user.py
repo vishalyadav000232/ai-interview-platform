@@ -119,3 +119,31 @@ class UserService(UserServiceInterface):
             "User deleted successfully",
             extra={"user_id": str(user_id)}
         )
+        
+    async def verify_email(self, user_id : UUID )-> User:
+        if not user_id :
+            raise ValueError("user_id are missing")
+        
+        user = await self.get_user_by_id(user_id=user_id)
+        
+        if user.is_email_verified:
+            logger.info(
+                "User email already verified",
+                extra={"user_id": str(user.id)}
+            )
+            return user
+                
+        updated_user = await self.update_user(
+            user_id=user.id ,
+            data={
+                "is_email_verified" : True
+            })
+        logger.info(
+            "Email verified successfully !",
+            extra={
+                "user_id":str(updated_user.id)
+            }
+        )
+        return updated_user
+        
+    

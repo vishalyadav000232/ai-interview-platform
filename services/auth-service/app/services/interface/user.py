@@ -26,3 +26,7 @@ class UserServiceInterface(ABC):
     @abstractmethod
     async def delete_user(self, user_id: UUID) -> None:
         pass
+
+    @abstractmethod
+    async def verify_email(self,user_id: UUID) -> User:
+        pass
