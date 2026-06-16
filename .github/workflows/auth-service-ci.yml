@@ -60,9 +60,9 @@ jobs:
       - name: Run migrations
         working-directory: services/auth-service
         run: |
-          alembic upgrade head
+          PYTHONPATH=. alembic upgrade head
 
       - name: Run tests
         working-directory: services/auth-service
         run: |
-          pytest
+           PYTHONPATH=. pytest
