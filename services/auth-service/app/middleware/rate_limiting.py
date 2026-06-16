@@ -40,6 +40,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         redis : Redis = getattr(request.app.state , "redis" , None)
         
+        if redis is None:
+            return call_next(request)
+        
         client_ip = request.client.host
 
         rule = self.rules[path]
