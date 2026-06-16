@@ -1,9 +1,12 @@
 import logging
 
 from fastapi import Request
+from redis.asyncio import Redis
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import JSONResponse
-from redis.asyncio import Redis
+
+from app.core.config import settings
+
 
 logger = logging.getLogger(__name__)
 
@@ -33,20 +36,33 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         }
 
     async def dispatch(self, request: Request, call_next):
+
+        if not settings.RATE_LIMIT_ENABLED:
+            return await call_next(request)
+
         path = request.url.path
 
         if path not in self.rules:
             return await call_next(request)
 
-        redis : Redis = getattr(request.app.state , "redis" , None)
-        
+        redis: Redis | None = getattr(
+            request.app.state,
+            "redis",
+            None
+        )
+
         if redis is None:
-            return call_next(request)
-        
-        client_ip = request.client.host
+            logger.warning(
+                "Redis client not found. Skipping rate limiter",
+                extra={
+                    "path": path,
+                }
+            )
+            return await call_next(request)
+
+        client_ip = request.client.host if request.client else "unknown"
 
         rule = self.rules[path]
-
         key = f"rate_limit:{path}:{client_ip}"
 
         try:
@@ -79,7 +95,6 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             )
 
             if current_count > rule["limit"]:
-
                 ttl = await redis.ttl(key)
 
                 logger.warning(
@@ -110,7 +125,6 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
             response.headers["X-RateLimit-Limit"] = str(
                 rule["limit"]
             )
-
             response.headers["X-RateLimit-Remaining"] = str(
                 max(
                     0,

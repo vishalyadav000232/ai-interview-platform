@@ -12,6 +12,9 @@ class Settings(BaseSettings):
     EMAIL_FROM: str = "AI Interview <onboarding@resend.dev>"
     AUTH_SERVICE_BASE_URL:str
     REDIS_URL: str = "redis://redis:6379/0"
+    RATE_LIMIT_ENABLED: bool = True
+    
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore"
