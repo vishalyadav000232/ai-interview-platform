@@ -350,7 +350,7 @@ class TokenService(TokenServiceInterface):
     async def verify_password_reset_token(self, token : str)-> dict:
         
         
-        payload =await  self.verify_token(token=token , token_type="password_rest")
+        payload =await  self.verify_token(token=token , token_type="password_reset")
         
         logger.info("password reset successfully ")
         
