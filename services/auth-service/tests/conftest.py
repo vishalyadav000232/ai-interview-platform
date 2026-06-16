@@ -11,6 +11,9 @@ from app.models.user import User
 from app.models.refresh_token import RefreshToken
 
 
+from redis.asyncio import Redis
+from asgi_lifespan import LifespanManager
+
 TEST_DATABASE_URL = settings.TEST_DATABASE_URL
 
 
@@ -47,12 +50,18 @@ async def setup_test_database():
 @pytest.fixture
 async def client():
     app.dependency_overrides[get_db] = override_get_db
+    
+    app.state.redis = Redis.from_url(
+        settings.REDIS_URL,
+        decode_responses=True
+    )
 
 
-    async with AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url="http://test",
-    ) as ac:
-        yield ac
+    async with LifespanManager(app):
+        async with AsyncClient(
+            transport=ASGITransport(app=app),
+            base_url="http://test",
+        ) as ac:
+            yield ac
 
     app.dependency_overrides.clear()
