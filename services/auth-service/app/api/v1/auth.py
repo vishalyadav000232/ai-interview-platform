@@ -1,6 +1,7 @@
 import logging
 
-from fastapi import APIRouter, Depends, HTTPException, status , Cookie , Query , BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status , Cookie , Query , BackgroundTasks 
+from fastapi.responses import HTMLResponse
 from fastapi.responses import Response
 from app.core.exceptions import AppException
 from app.schemas.user import CreateUser 
@@ -430,3 +431,6 @@ async def reset_password(
         "success": True,
         "message": "Password reset successfully"
     }
+    
+
+
