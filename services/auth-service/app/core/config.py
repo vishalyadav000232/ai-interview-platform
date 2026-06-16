@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     RESEND_API_KEY: str
     EMAIL_FROM: str = "AI Interview <onboarding@resend.dev>"
     AUTH_SERVICE_BASE_URL:str
-
+    REDIS_URL: str = "redis://redis:6379/0"
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore"

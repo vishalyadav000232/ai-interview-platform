@@ -2,14 +2,13 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
 from app.api.router import api_router
-from app.core.config import settings
 from app.core.logging import setup_logging
 from app.core.exception_handler import register_exception_handlers
 from app.db.session import engine, AsyncSessionLocal
+from app.core.redis import create_redis_client
 
 
 setup_logging()
@@ -22,24 +21,35 @@ async def lifespan(app: FastAPI):
     logger.info("Starting Auth Service")
 
     try:
+        
+        app.state.redis = create_redis_client()
+        await app.state.redis.ping()
+        logger.info("Redis connected successfully")
+
+
         async with AsyncSessionLocal() as session:
             await session.execute(text("SELECT 1"))
 
         logger.info("Database connected successfully")
+        logger.info("Auth Service started successfully")
+
+        yield
 
     except Exception:
-        logger.exception("Database connection failed")
+        logger.exception("Auth Service startup failed")
         raise
 
-    logger.info("Auth Service started successfully")
+    finally:
+        logger.info("Shutting down Auth Service")
 
-    yield
+        redis = getattr(app.state, "redis", None)
 
-    logger.info("Shutting down Auth Service")
+        if redis:
+            await redis.aclose()
+            logger.info("Redis connection closed successfully")
 
-    await engine.dispose()
-
-    logger.info("Database engine disposed successfully")
+        await engine.dispose()
+        logger.info("Database engine disposed successfully")
 
 
 app = FastAPI(
@@ -52,17 +62,6 @@ app = FastAPI(
 )
 
 register_exception_handlers(app)
-
-
-# CORS
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=settings.ALLOWED_ORIGINS,
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
 
 app.include_router(api_router)
 
