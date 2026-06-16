@@ -15,19 +15,19 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
         self.rules = {
             "/auth/login": {
-                "limit": 5,
+                "limit": 500,
                 "window_seconds": 60,
             },
             "/auth/register": {
-                "limit": 3,
+                "limit": 300,
                 "window_seconds": 60,
             },
             "/auth/forgot-password": {
-                "limit": 3,
+                "limit": 300,
                 "window_seconds": 300,
             },
             "/auth/me": {
-                "limit": 3,
+                "limit": 300,
                 "window_seconds": 300,
             },
         }
