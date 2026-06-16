@@ -38,7 +38,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if path not in self.rules:
             return await call_next(request)
 
-        redis : Redis = request.app.state.redis
+        redis : Redis = getattr(request.app.state , "redis" , None)
+        
         client_ip = request.client.host
 
         rule = self.rules[path]

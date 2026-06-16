@@ -50,11 +50,7 @@ async def setup_test_database():
 @pytest.fixture
 async def client():
     app.dependency_overrides[get_db] = override_get_db
-    
-    app.state.redis = Redis.from_url(
-        settings.REDIS_URL,
-        decode_responses=True
-    )
+
 
 
     async with LifespanManager(app):
