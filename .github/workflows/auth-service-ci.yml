@@ -66,4 +66,4 @@ jobs:
       - name: Run tests
         working-directory: services/auth-service
         run: |
-          pytest
+            PYTHONPATH=. pytest
