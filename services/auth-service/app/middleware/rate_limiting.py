@@ -37,7 +37,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next):
 
-        if not settings.RATE_LIMIT_ENABLED:
+        if settings.RATE_LIMIT_ENABLED is False:
             return await call_next(request)
 
         path = request.url.path

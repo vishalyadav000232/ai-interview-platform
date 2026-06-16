@@ -45,6 +45,16 @@ async def setup_test_database():
 
     async with test_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
+        
+        
+
+
+@pytest.fixture(autouse=True)
+async def clear_redis(app):
+    redis = getattr(app.state, "redis", None)
+
+    if redis:
+        await redis.flushdb()
 
 
 @pytest.fixture
