@@ -11,6 +11,8 @@ from app.db.session import engine, AsyncSessionLocal
 from app.core.redis import create_redis_client
 
 
+from app.middleware.rate_limiting import RateLimitMiddleware
+
 setup_logging()
 
 logger = logging.getLogger(__name__)
@@ -64,6 +66,8 @@ app = FastAPI(
 register_exception_handlers(app)
 
 app.include_router(api_router)
+
+app.add_middleware(RateLimitMiddleware)
 
 
 @app.get("/health", tags=["Health"])
