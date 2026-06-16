@@ -202,5 +202,5 @@ reset_link: str
                 "Failed to send password reset email",
                 extra={"email": email}
             )
-            raise
+            
 
