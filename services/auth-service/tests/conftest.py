@@ -66,3 +66,11 @@ async def client():
             yield ac
 
     app.dependency_overrides.clear()
+    
+@pytest.fixture(autouse=True)
+async def clean_database():
+    yield
+
+    async with test_engine.begin() as conn:
+        for table in reversed(Base.metadata.sorted_tables):
+            await conn.execute(table.delete())
