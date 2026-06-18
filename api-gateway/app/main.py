@@ -10,10 +10,12 @@ from app.core.config import settings
 from app.core.loggging import setup_logging
 from app.routes.routes import router as main_router
 from app.middleware.requset_logging import RequestLoggingMiddleware
-
+from app.middleware.rate_limiting import RateLimitMiddleware
 
 from app.core.exception import GatewayException
 from app.core.exception_handler import gateway_exception_handler
+
+from app.core.redis import create_redis_client
 
 logger = logging.getLogger(__name__)
 
@@ -29,11 +31,24 @@ async def lifespan(app : FastAPI):
     )
     
     logger.info("HTTP client initialized")
+    
+    
+    app.state.redis = create_redis_client()
+    await app.state.redis.ping()
+    logger.info("Redis connected successfully")
+    
     yield
     
     
 
     await app.state.http_client.aclose()
+    
+    redis = getattr(app.state , "redis" , None)
+    
+    
+    if redis:
+            await redis.aclose()
+            logger.info("Redis connection closed successfully")
     
     logger.info("HTTP client closed")
     logger.info("API Gateway stopped")
@@ -60,6 +75,7 @@ app.add_middleware(
 )
 
 app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(RateLimitMiddleware)
 
 
 app.include_router(main_router)

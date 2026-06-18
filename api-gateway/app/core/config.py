@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
 
     AUTH_SERVICE_URL: str = "http://auth-service:8001"
+    REDIS_URL : str
+    RATE_LIMIT_ENABLED: bool = True
 
     model_config = SettingsConfigDict(
         env_file=".env",
