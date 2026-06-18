@@ -2,6 +2,7 @@ import logging
 
 import httpx
 from fastapi import APIRouter, HTTPException, Request, Response
+from app.core.exception import GatewayException
 
 from app.core.config import settings
 
@@ -88,10 +89,10 @@ async def auth_proxy_request(path: str, request: Request):
             }
         )
 
-        raise HTTPException(
-            status_code=503,
-            detail="Auth service unavailable"
-        ) from exc
+        raise GatewayException(
+            message="Auth service unavailable",
+            status_code=503
+        )
 
     response = Response(
         content=upstream_response.content,

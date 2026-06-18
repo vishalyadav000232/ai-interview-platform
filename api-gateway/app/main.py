@@ -12,6 +12,9 @@ from app.routes.routes import router as main_router
 from app.middleware.requset_logging import RequestLoggingMiddleware
 
 
+from app.core.exception import GatewayException
+from app.core.exception_handler import gateway_exception_handler
+
 logger = logging.getLogger(__name__)
 
 @asynccontextmanager
@@ -60,3 +63,8 @@ app.add_middleware(RequestLoggingMiddleware)
 
 
 app.include_router(main_router)
+
+app.add_exception_handler(
+    GatewayException,
+    gateway_exception_handler
+)
