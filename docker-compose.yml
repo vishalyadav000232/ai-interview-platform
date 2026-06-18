@@ -1,4 +1,19 @@
 services:
+
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api-gateway
+    env_file:
+      - ./api-gateway/.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - auth-service
+    restart: unless-stopped
+
+    
   auth-service:
     build:
       context: ./services/auth-service
@@ -46,6 +61,8 @@ services:
     ports:
     - "6379:6379"
     
+  
+
       
 
 
