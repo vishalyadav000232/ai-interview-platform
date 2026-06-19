@@ -11,6 +11,7 @@ from app.core.loggging import setup_logging
 from app.routes.routes import router as main_router
 from app.middleware.requset_logging import RequestLoggingMiddleware
 from app.middleware.rate_limiting import RateLimitMiddleware
+from app.middleware.jwt_middleware import JWTValidationMiddleware
 
 from app.core.exception import GatewayException
 from app.core.exception_handler import gateway_exception_handler
@@ -76,6 +77,7 @@ app.add_middleware(
 
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(RateLimitMiddleware)
+app.add_middleware(JWTValidationMiddleware)
 
 
 app.include_router(main_router)

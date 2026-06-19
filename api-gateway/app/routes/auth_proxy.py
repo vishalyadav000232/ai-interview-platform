@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException, Request, Response
 from app.core.exception import GatewayException
 
 from app.core.config import settings
-
+from app.services.build_forword_service import build_forward_headers
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,8 @@ async def auth_proxy_request(path: str, request: Request):
 
     body = await request.body()
 
-    headers = dict(request.headers)
+    headers = build_forward_headers(request)
+
     headers.pop("host", None)
 
     client: httpx.AsyncClient | None = getattr(
