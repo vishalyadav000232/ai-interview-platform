@@ -8,7 +8,11 @@ class Settings(BaseSettings):
     AUTH_SERVICE_URL: str = "http://auth-service:8001"
     REDIS_URL : str
     RATE_LIMIT_ENABLED: bool = True
-
+    JWT_SECRATE_KEY :str = 'D'
+    JWT_ALGORITHM :str = 'HS256'
+    
+    
+    
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
