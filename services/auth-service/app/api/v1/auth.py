@@ -432,5 +432,13 @@ async def reset_password(
         "message": "Password reset successfully"
     }
     
+from fastapi.requests import Request
 
-
+@router.get("/debug-headers")
+async def debug_headers(request: Request):
+    return {
+        "x_request_id": request.headers.get("x-request-id"),
+        "x_user_id": request.headers.get("x-user-id"),
+        "x_user_role": request.headers.get("x-user-role"),
+        "authorization_exists": request.headers.get("authorization") is not None
+    }
