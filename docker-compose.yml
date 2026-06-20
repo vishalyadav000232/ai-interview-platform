@@ -31,6 +31,21 @@ services:
     depends_on:
       - postgres
 
+    
+  resume-service:
+    build:
+      context: ./services/resume-service
+    container_name: resume-service
+    env_file:
+      - ./services/resume-service/.env
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./services/resume-service/app:/app/app
+    depends_on:
+      - postgres
+      - redis
+
   postgres:
     image: postgres:16
     container_name: ai-postgres
