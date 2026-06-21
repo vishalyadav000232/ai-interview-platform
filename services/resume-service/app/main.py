@@ -8,6 +8,7 @@ from app.core.logging import setup_logging
 from app.core.redis import create_redis_client
 from app.core.config import settings
 from app.database.session import AsyncLoaclSession , engine
+from app.apis.route import router as main_router
 from sqlalchemy import text
 
 
@@ -79,6 +80,8 @@ async def health():
         "status": "healthy",
     
     }
+    
+app.include_router(main_router)
 
 
 @app.exception_handler(Exception)

@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
-
+from typing import List
 from app.models.resume import ResumeStatus
 
 
@@ -30,4 +30,8 @@ class ResumeDataResponse(BaseModel):
     message : str
     data : ResumeResponse
     
-
+class ResumeListResponse(BaseModel):
+    success : bool
+    message : str
+    data : List[ResumeResponse]
+    
