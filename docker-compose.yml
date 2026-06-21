@@ -42,6 +42,8 @@ services:
       - "8002:8002"
     volumes:
       - ./services/resume-service/app:/app/app
+      - ./services/resume-service/migrations:/app/migrations
+      - ./services/resume-service/alembic.ini:/app/alembic.ini
     depends_on:
       - postgres
       - redis
