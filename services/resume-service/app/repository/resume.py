@@ -91,20 +91,28 @@ class ResumeRepository(ResumeRepositoryInterface):
         failure_reason: str | None = None,
     ) -> Resume | None:
         try:
-            resume = await self.get_by_id(resume_id)
-
-            if resume is None:
+            
+            values = {
+                "status":status
+            }
+            
+            if failure_reason is not None:
+                values["failure_reason"]  = failure_reason
+                
+            result = self.db.execute(
+                update(Resume).where(
+                    Resume.id == resume_id
+                ).values(**values)
+            )
+            
+            if result.rowcount == 0:
+                await self.db.rollback()
                 return None
 
-            resume.status = status
-
-            if failure_reason is not None:
-                resume.failure_reason = failure_reason
-
             await self.db.commit()
-            await self.db.refresh(resume)
+            await self.db.refresh()
 
-            return resume
+            return await self.get_by_id(resume_id)
 
         except Exception:
             await self.db.rollback()
