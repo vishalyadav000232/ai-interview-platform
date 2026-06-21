@@ -1,7 +1,7 @@
 import logging
 from uuid import UUID
 
-from sqlalchemy import select , update
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.resume import Resume, ResumeStatus
@@ -38,11 +38,12 @@ class ResumeRepository(ResumeRepositoryInterface):
 
     async def get_by_id(self, resume_id: UUID) -> Resume | None:
         result = await self.db.execute(
-            update(Resume).where(
+            select(Resume).where(
                 Resume.id == resume_id,
                 Resume.is_deleted.is_(False),
             )
         )
+
         return result.scalar_one_or_none()
 
     async def get_by_user_id(
@@ -91,28 +92,32 @@ class ResumeRepository(ResumeRepositoryInterface):
         failure_reason: str | None = None,
     ) -> Resume | None:
         try:
-            
             values = {
-                "status":status
+                "status": status,
             }
-            
+
             if failure_reason is not None:
-                values["failure_reason"]  = failure_reason
-                
-            result = self.db.execute(
-                update(Resume).where(
-                    Resume.id == resume_id
-                ).values(**values)
+                values["failure_reason"] = failure_reason
+
+            result = await self.db.execute(
+                update(Resume)
+                .where(
+                    Resume.id == resume_id,
+                    Resume.is_deleted.is_(False),
+                )
+                .values(**values)
+                .returning(Resume)
             )
-            
-            if result.rowcount == 0:
+
+            resume = result.scalar_one_or_none()
+
+            if resume is None:
                 await self.db.rollback()
                 return None
 
             await self.db.commit()
-            await self.db.refresh()
 
-            return await self.get_by_id(resume_id)
+            return resume
 
         except Exception:
             await self.db.rollback()
@@ -133,16 +138,26 @@ class ResumeRepository(ResumeRepositoryInterface):
         parsed_text: str,
     ) -> Resume | None:
         try:
-            resume = await self.get_by_id(resume_id)
+            result = await self.db.execute(
+                update(Resume)
+                .where(
+                    Resume.id == resume_id,
+                    Resume.is_deleted.is_(False),
+                )
+                .values(
+                    parsed_text=parsed_text,
+                    status=ResumeStatus.ANALYZED,
+                )
+                .returning(Resume)
+            )
+
+            resume = result.scalar_one_or_none()
 
             if resume is None:
+                await self.db.rollback()
                 return None
 
-            resume.parsed_text = parsed_text
-            resume.status = ResumeStatus.ANALYZED
-
             await self.db.commit()
-            await self.db.refresh(resume)
 
             return resume
 
@@ -160,13 +175,21 @@ class ResumeRepository(ResumeRepositoryInterface):
 
     async def soft_delete(self, resume_id: UUID) -> bool:
         try:
-            resume = await self.get_by_id(resume_id)
+            result = await self.db.execute(
+                update(Resume)
+                .where(
+                    Resume.id == resume_id,
+                    Resume.is_deleted.is_(False),
+                )
+                .values(
+                    is_active=False,
+                    is_deleted=True,
+                )
+            )
 
-            if resume is None:
+            if result.rowcount == 0:
+                await self.db.rollback()
                 return False
-
-            resume.is_active = False
-            resume.is_deleted = True
 
             await self.db.commit()
 
