@@ -17,3 +17,5 @@ resend
 redis
 asgi-lifespan
 pytest-cov
+
+alembic
