@@ -23,9 +23,12 @@ async def resume_proxy_request(
 ):
     target_url = f"{settings.RESUME_SERVICE_URL}/resume/{path}"
 
+    request_id = getattr(request.state, "request_id", None)
+
     logger.info(
-        f"Incoming resume proxy request {target_url}",
+        "Incoming resume proxy request",
         extra={
+            "request_id": request_id,
             "method": request.method,
             "path": path,
             "target_url": target_url,
@@ -34,7 +37,6 @@ async def resume_proxy_request(
 
     body = await request.body()
     headers = build_forward_headers(request)
-    headers.pop("host", None)
 
     client: httpx.AsyncClient | None = getattr(
         request.app.state,
@@ -43,7 +45,10 @@ async def resume_proxy_request(
     )
 
     if client is None:
-        logger.error("HTTP client is missing from app.state")
+        logger.error(
+            "HTTP client is missing from app.state",
+            extra={"request_id": request_id}
+        )
 
         raise HTTPException(
             status_code=500,
@@ -63,6 +68,7 @@ async def resume_proxy_request(
         logger.info(
             "Resume service response received",
             extra={
+                "request_id": request_id,
                 "status_code": upstream_response.status_code,
                 "target_url": target_url,
             }
@@ -72,6 +78,7 @@ async def resume_proxy_request(
         logger.exception(
             "Resume service unavailable",
             extra={
+                "request_id": request_id,
                 "target_url": target_url,
                 "method": request.method,
                 "error": str(exc),
@@ -89,8 +96,15 @@ async def resume_proxy_request(
         media_type=upstream_response.headers.get("content-type")
     )
 
+    excluded_headers = {
+        "content-encoding",
+        "transfer-encoding",
+        "connection",
+        "content-length",
+    }
+
     for key, value in upstream_response.headers.items():
-        if key.lower() == "set-cookie":
-            response.headers.append("set-cookie", value)
+        if key.lower() not in excluded_headers:
+            response.headers[key] = value
 
     return response
