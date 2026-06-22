@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, UploadFile, status
+from fastapi import APIRouter, Depends, File, UploadFile, status , Header
 
 from app.services.interface.resume import ResumeServiceInterface
 from app.schemas.resume import ResumeDataResponse  , ResumeListResponse
@@ -18,12 +18,12 @@ router = APIRouter()
     response_model=ResumeDataResponse,
 )
 async def upload_resume(
-    user_id: UUID,
+    x_request_id: UUID = Header(...),
     file: UploadFile = File(...),
     resume_service: ResumeServiceInterface = Depends(get_resume_service),
 ):
     resume = await resume_service.upload_resume(
-        user_id=user_id,
+        user_id=x_request_id,
         file=file,
     )
 
