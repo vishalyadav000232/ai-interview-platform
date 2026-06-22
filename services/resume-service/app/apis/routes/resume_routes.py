@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, UploadFile, status , Header
+from fastapi import APIRouter, Depends, File, UploadFile, status , Header , HTTPException
 
 from app.services.interface.resume import ResumeServiceInterface
 from app.schemas.resume import ResumeDataResponse  , ResumeListResponse
@@ -48,4 +48,52 @@ async def get_user_resumes(
         "success": True,
         "message": "Resumes fetched successfully",
         "data": resumes,
+    }
+
+
+@router.get("/my-resume"  , status_code=status.HTTP_200_OK , response_model=ResumeListResponse)
+async def get_my_resume(
+    x_user_id :UUID = Header(...),
+    resume_service: ResumeServiceInterface = Depends(get_resume_service),
+):
+    
+    resumes = await resume_service.get_user_resumes(user_id=x_user_id)
+    
+    return{
+        "success": True,
+        "message": "Resumes fetched successfully",
+        "data": resumes,
+    }
+
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, Header, HTTPException, status
+
+
+
+@router.get(
+    "/{resume_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=ResumeDataResponse
+)
+async def get_resume(
+    resume_id: UUID,
+    x_user_id: UUID = Header(...),
+    resume_service: ResumeServiceInterface = Depends(get_resume_service),
+):
+    print(resume_id)
+    resume = await resume_service.get_resume(resume_id=resume_id , user_id=x_user_id)
+
+    if resume is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume not found"
+        )
+
+    
+
+    return {
+        "success": True,
+        "message": "Resume fetched successfully",
+        "data": resume,
     }

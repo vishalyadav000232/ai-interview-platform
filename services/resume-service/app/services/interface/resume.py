@@ -19,6 +19,7 @@ class ResumeServiceInterface(ABC):
     @abstractmethod
     async def get_resume(
         self,
+        user_id : UUID,
         resume_id: UUID,
     ) -> Resume | None:
         pass

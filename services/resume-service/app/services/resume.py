@@ -102,7 +102,7 @@ class ResumeService(ResumeServiceInterface):
         if resume is None:
             return None
 
-        if resume.user_id != user_id:
+        if str(resume.user_id) != str(user_id):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="You do not have permission to access this resume",
