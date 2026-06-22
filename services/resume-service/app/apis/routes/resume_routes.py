@@ -97,3 +97,40 @@ async def get_resume(
         "message": "Resume fetched successfully",
         "data": resume,
     }
+
+
+@router.delete(
+    "/{resume_id}",
+    status_code=status.HTTP_200_OK,
+)
+async def delete_resume(
+    resume_id: UUID,
+    x_user_id: UUID = Header(...),
+    resume_service: ResumeServiceInterface = Depends(get_resume_service),
+):
+    resume = await resume_service.get_resume(resume_id)
+
+    if resume is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume not found",
+        )
+
+    if str(resume.user_id) != str(x_user_id):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have permission to delete this resume",
+        )
+
+    deleted = await resume_service.delete_resume(resume_id)
+
+    if not deleted:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Resume could not be deleted",
+        )
+
+    return {
+        "success": True,
+        "message": "Resume deleted successfully",
+    }
