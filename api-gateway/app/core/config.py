@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
 
     AUTH_SERVICE_URL: str = "http://auth-service:8001"
+    RESUME_SERVICE_URL: str = "http://resume-service:8002"
     REDIS_URL : str
     RATE_LIMIT_ENABLED: bool = True
     JWT_SECRATE_KEY :str = 'D'

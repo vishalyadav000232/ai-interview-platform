@@ -2,8 +2,9 @@ from fastapi import APIRouter
 
 from app.routes.health import router as health_router
 from app.routes.auth_proxy import router as auth_proxy_router
-
+from app.routes.resume_proxy import router as resume_proxy_router
 router = APIRouter()
 
 router.include_router(health_router)
 router.include_router(auth_proxy_router)
+router.include_router(resume_proxy_router)
