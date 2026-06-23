@@ -9,6 +9,8 @@ from app.services.interface.resume import ResumeServiceInterface
 from app.schemas.resume import ResumeDataResponse  , ResumeListResponse
 
 
+from app.dependencies.auth import get_current_user_id
+
 
 from app.dependencies.service_deps import get_resume_service
 
@@ -56,11 +58,11 @@ async def get_user_resumes(
 
 @router.get("/my-resume"  , status_code=status.HTTP_200_OK , response_model=ResumeListResponse)
 async def get_my_resume(
-    x_user_id :UUID = Header(...),
+    user_id :UUID = Depends(get_current_user_id),
     resume_service: ResumeServiceInterface = Depends(get_resume_service),
 ):
     
-    resumes = await resume_service.get_user_resumes(user_id=x_user_id)
+    resumes = await resume_service.get_user_resumes(user_id=user_id)
     
     return{
         "success": True,
@@ -81,11 +83,11 @@ from fastapi import APIRouter, Depends, Header, HTTPException, status
 )
 async def get_resume(
     resume_id: UUID,
-    x_user_id: UUID = Header(...),
+    user_id :UUID = Depends(get_current_user_id),
     resume_service: ResumeServiceInterface = Depends(get_resume_service),
 ):
     print(resume_id)
-    resume = await resume_service.get_resume(resume_id=resume_id , user_id=x_user_id)
+    resume = await resume_service.get_resume(resume_id=resume_id , user_id=user_id)
 
     if resume is None:
         raise HTTPException(
@@ -108,10 +110,10 @@ async def get_resume(
 )
 async def delete_resume(
     resume_id: UUID,
-    x_user_id: UUID = Header(...),
+    user_id :UUID = Depends(get_current_user_id),
     resume_service: ResumeServiceInterface = Depends(get_resume_service),
 ):
-    resume = await resume_service.get_resume(resume_id)
+    resume = await resume_service.get_resume(resume_id=resume_id , user_id=user_id)
 
     if resume is None:
         raise HTTPException(
@@ -119,7 +121,7 @@ async def delete_resume(
             detail="Resume not found",
         )
 
-    if str(resume.user_id) != str(x_user_id):
+    if str(resume.user_id) != str(user_id):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You do not have permission to delete this resume",
@@ -142,10 +144,10 @@ async def delete_resume(
 @router.get("/download/{resume_id}")
 async def download_resume(
     resume_id: UUID,
-    x_user_id: UUID = Header(..., alias="X-User-ID"),
+    user_id :UUID = Depends(get_current_user_id),
     resume_service: ResumeServiceInterface = Depends(get_resume_service),
 ):
-    resume = await resume_service.get_resume(resume_id=resume_id , user_id=x_user_id)
+    resume = await resume_service.get_resume(resume_id=resume_id , user_id=user_id)
 
     if resume is None:
         raise HTTPException(
@@ -153,7 +155,7 @@ async def download_resume(
             detail="Resume not found",
         )
 
-    if resume.user_id != x_user_id:
+    if resume.user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not allowed to download this resume",
