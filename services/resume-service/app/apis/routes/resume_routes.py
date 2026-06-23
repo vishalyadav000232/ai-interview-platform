@@ -1,6 +1,9 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, UploadFile, status , Header , HTTPException
+from fastapi import APIRouter, Depends, File, UploadFile, status , Header , HTTPException 
+from pathlib import Path 
+
+from fastapi.responses import FileResponse
 
 from app.services.interface.resume import ResumeServiceInterface
 from app.schemas.resume import ResumeDataResponse  , ResumeListResponse
@@ -134,3 +137,43 @@ async def delete_resume(
         "success": True,
         "message": "Resume deleted successfully",
     }
+    
+
+@router.get("/download/{resume_id}")
+async def download_resume(
+    resume_id: UUID,
+    x_user_id: UUID = Header(..., alias="X-User-ID"),
+    resume_service: ResumeServiceInterface = Depends(get_resume_service),
+):
+    resume = await resume_service.get_resume(resume_id=resume_id , user_id=x_user_id)
+
+    if resume is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume not found",
+        )
+
+    if resume.user_id != x_user_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not allowed to download this resume",
+        )
+        
+    print("resume.file_url =", resume.file_url)
+    print("absolute path =", Path(resume.file_url).resolve())
+    print("exists =", Path(resume.file_url).exists())
+
+    file_path = Path(resume.file_url)
+
+    if not file_path.exists():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Resume file not found",
+        )
+
+    return FileResponse(
+        path=file_path,
+        filename=resume.original_file_name,
+        media_type="application/octet-stream",
+    )
+    
