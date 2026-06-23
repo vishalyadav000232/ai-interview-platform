@@ -44,6 +44,7 @@ services:
       - ./services/resume-service/app:/app/app
       - ./services/resume-service/migrations:/app/migrations
       - ./services/resume-service/alembic.ini:/app/alembic.ini
+      - ./services/resume-service/uploads:/app/uploads
     depends_on:
       - postgres
       - redis
