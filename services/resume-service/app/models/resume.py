@@ -3,7 +3,7 @@ from sqlalchemy import String , Boolean , DateTime , Text , Enum , Integer
 
 from datetime import datetime , timezone
 from sqlalchemy.dialects.postgresql import UUID
-from uuid import uuid4
+from uuid import uuid4 , UUID as PayUUID
 
 from app.database.base import Base
 from enum import Enum as PyEnum
@@ -21,9 +21,9 @@ class Resume(Base):
     
     __tablename__= "resumes"
     
-    id : Mapped[UUID] = mapped_column(UUID(as_uuid=True) , primary_key=True , index= True , default=uuid4)
+    id : Mapped[PayUUID] = mapped_column(UUID(as_uuid=True) , primary_key=True , index= True , default=uuid4)
     
-    user_id : Mapped[UUID] = mapped_column(UUID(as_uuid=True) , index=True , nullable=False)
+    user_id : Mapped[PayUUID] = mapped_column(UUID(as_uuid=True) , index=True , nullable=False)
     
     original_file_name : Mapped[str]= mapped_column(String(255) , nullable=False)
     
@@ -101,13 +101,27 @@ class Resume(Base):
 )
     
     skills = relationship(
-    "ResumeSkill",
+    "ResumeSkills",
     back_populates="resume",
     cascade="all, delete-orphan",
 )
     
     educations = relationship(
     "ResumeEducation",
+    back_populates="resume",
+    cascade="all, delete-orphan",
+)
+    
+    
+    experiences = relationship(
+    "ResumeExperience",
+    back_populates="resume",
+    cascade="all, delete-orphan",
+)
+    
+    
+    projects = relationship(
+    "ResumeProject",
     back_populates="resume",
     cascade="all, delete-orphan",
 )
