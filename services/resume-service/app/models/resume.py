@@ -1,4 +1,4 @@
-from sqlalchemy.orm import mapped_column , Mapped  
+from sqlalchemy.orm import mapped_column , Mapped  , relationship 
 from sqlalchemy import String , Boolean , DateTime , Text , Enum , Integer
 
 from datetime import datetime , timezone
@@ -92,3 +92,10 @@ class Resume(Base):
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc)
     )
+    
+    profile = relationship(
+    "ResumeProfile",
+    back_populates="resume",
+    uselist=False,
+    cascade="all, delete-orphan",
+)
