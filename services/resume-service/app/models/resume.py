@@ -99,3 +99,9 @@ class Resume(Base):
     uselist=False,
     cascade="all, delete-orphan",
 )
+    
+    skills = relationship(
+    "ResumeSkill",
+    back_populates="resume",
+    cascade="all, delete-orphan",
+)
