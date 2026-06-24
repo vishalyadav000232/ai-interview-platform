@@ -11,7 +11,8 @@ from app.core.config import settings
 
 from app.database.base import Base
 from app.models.resume import Resume
-
+from app.models.resume_profile import ResumeProfile
+from app.models.resume_skills import ResumeSkills
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
