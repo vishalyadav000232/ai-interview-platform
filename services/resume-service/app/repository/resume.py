@@ -5,38 +5,28 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.resume import Resume, ResumeStatus
+from app.repository.base import BaseRepository
 from app.repository.interface.resume import ResumeRepositoryInterface
 
 
 logger = logging.getLogger(__name__)
 
 
-class ResumeRepository(ResumeRepositoryInterface):
-    def __init__(self, db: AsyncSession):
-        self.db = db
+class ResumeRepository(
+    BaseRepository[Resume],
+    ResumeRepositoryInterface,
+):
 
-    async def create(self, resume: Resume) -> Resume:
-        try:
-            self.db.add(resume)
+    def __init__(
+        self,
+        db: AsyncSession,
+    ) -> None:
+        super().__init__(db, Resume)
 
-            await self.db.commit()
-            await self.db.refresh(resume)
-
-            return resume
-
-        except Exception:
-            await self.db.rollback()
-
-            logger.exception(
-                "Failed to create resume",
-                extra={
-                    "user_id": str(resume.user_id),
-                },
-            )
-
-            raise
-
-    async def get_by_id(self, resume_id: UUID) -> Resume | None:
+    async def get_by_id(
+        self,
+        resume_id: UUID,
+    ) -> Resume | None:
         result = await self.db.execute(
             select(Resume).where(
                 Resume.id == resume_id,
@@ -90,6 +80,7 @@ class ResumeRepository(ResumeRepositoryInterface):
         resume_id: UUID,
         status: ResumeStatus,
         failure_reason: str | None = None,
+        commit: bool = True,
     ) -> Resume | None:
         try:
             values = {
@@ -112,10 +103,13 @@ class ResumeRepository(ResumeRepositoryInterface):
             resume = result.scalar_one_or_none()
 
             if resume is None:
-                await self.db.rollback()
+                if commit:
+                    await self.db.rollback()
                 return None
 
-            await self.db.commit()
+            if commit:
+                await self.db.commit()
+                await self.db.refresh(resume)
 
             return resume
 
@@ -136,6 +130,7 @@ class ResumeRepository(ResumeRepositoryInterface):
         self,
         resume_id: UUID,
         parsed_text: str,
+        commit: bool = True,
     ) -> Resume | None:
         try:
             result = await self.db.execute(
@@ -154,10 +149,13 @@ class ResumeRepository(ResumeRepositoryInterface):
             resume = result.scalar_one_or_none()
 
             if resume is None:
-                await self.db.rollback()
+                if commit:
+                    await self.db.rollback()
                 return None
 
-            await self.db.commit()
+            if commit:
+                await self.db.commit()
+                await self.db.refresh(resume)
 
             return resume
 
@@ -173,7 +171,11 @@ class ResumeRepository(ResumeRepositoryInterface):
 
             raise
 
-    async def soft_delete(self, resume_id: UUID) -> bool:
+    async def soft_delete(
+        self,
+        resume_id: UUID,
+        commit: bool = True,
+    ) -> bool:
         try:
             result = await self.db.execute(
                 update(Resume)
@@ -188,10 +190,12 @@ class ResumeRepository(ResumeRepositoryInterface):
             )
 
             if result.rowcount == 0:
-                await self.db.rollback()
+                if commit:
+                    await self.db.rollback()
                 return False
 
-            await self.db.commit()
+            if commit:
+                await self.db.commit()
 
             return True
 

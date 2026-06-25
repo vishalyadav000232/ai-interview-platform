@@ -8,15 +8,29 @@ from app.models.resume import Resume
 from app.repository.interface.resume import ResumeRepositoryInterface
 from app.services.interface.resume import ResumeServiceInterface
 
+from app.repository.interface.resume_education import ResumeEducationRepositoryInterface
+from app.repository.interface.resume_profile import ResumeProfileRepositoryInterface
+from app.repository.interface.resume_skill import ResumeSkillRepositoryInterface
+
+
 
 logger = logging.getLogger(__name__)
 
 
 class ResumeService(ResumeServiceInterface):
-    def __init__(self, resume_repo: ResumeRepositoryInterface):
+    def __init__(self,
+                resume_repo: ResumeRepositoryInterface,
+                profile_repo: ResumeProfileRepositoryInterface,
+                skill_repo: ResumeSkillRepositoryInterface,
+                education_repo: ResumeEducationRepositoryInterface,
+                 ):
         self.resume_repo = resume_repo
         self.upload_dir = Path("uploads/resumes")
         self.upload_dir.mkdir(parents=True, exist_ok=True)
+        
+        self.profile_repo = profile_repo
+        self.skill_repo = skill_repo
+        self.education_repo = education_repo
 
     async def upload_resume(
         self,
