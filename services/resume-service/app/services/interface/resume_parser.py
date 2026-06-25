@@ -11,7 +11,5 @@ class ResumeParsingServiceInterface(ABC):
         resume_id: UUID,
         file_path: Path,
     ) -> None:
-        """
-        Extract, parse and persist structured resume data.
-        """
+        
         raise NotImplementedError

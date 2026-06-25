@@ -59,6 +59,8 @@ class ResumeParsingService:
 
             try:
                 parsed_data = await self.resume_parser.parse(text)
+                
+                print("this is the parse data --> " , parsed_data)
             except Exception as exc:
                 raise ResumeParsingException() from exc
 

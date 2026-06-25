@@ -1,7 +1,7 @@
 import logging
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import select, update , func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.resume import Resume, ResumeStatus
@@ -89,6 +89,15 @@ class ResumeRepository(
 
             if failure_reason is not None:
                 values["failure_reason"] = failure_reason
+                
+            if status == ResumeStatus.PROCESSING:
+                 values["processing_started_at"] = func.now()
+
+            if status in (
+        ResumeStatus.ANALYZED,
+        ResumeStatus.FAILED,
+         ):
+             values["processing_completed_at"] = func.now()
 
             result = await self.db.execute(
                 update(Resume)

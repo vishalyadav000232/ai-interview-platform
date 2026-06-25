@@ -43,3 +43,11 @@ class ResumeParsingException(ResumeException):
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             error_code="RESUME_PARSE_FAILED",
         )
+
+class ResumeParsedDataInvalidException(ResumeException):
+    def __init__(self):
+        super().__init__(
+            message="Failed to parse resume text",
+            status_code=status.HTTP_404_NOT_FOUND,
+            error_code="RESUME_PARSE_FAILED",
+        )
