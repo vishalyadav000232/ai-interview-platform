@@ -1,14 +1,14 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, File, UploadFile, status , Header , HTTPException 
+from fastapi import APIRouter, Depends, File, UploadFile, status , Header , HTTPException  , BackgroundTasks
 from pathlib import Path 
 
 from fastapi.responses import FileResponse
 
 from app.services.interface.resume import ResumeServiceInterface
 from app.schemas.resume import ResumeDataResponse  , ResumeListResponse
-
-
+from app.dependencies.parser_deps import get_resume_parse_service
+from app.services.interface.resume_parser import ResumeParsingServiceInterface
 from app.dependencies.auth import get_current_user_id
 
 
@@ -23,13 +23,21 @@ router = APIRouter()
     response_model=ResumeDataResponse,
 )
 async def upload_resume(
+    background_tasks : BackgroundTasks,
     x_request_id: UUID = Header(...),
     file: UploadFile = File(...),
+    parsing_service : ResumeParsingServiceInterface= Depends(get_resume_parse_service),
     resume_service: ResumeServiceInterface = Depends(get_resume_service),
 ):
     resume = await resume_service.upload_resume(
         user_id=x_request_id,
         file=file,
+    )
+    
+    background_tasks.add_task(
+        parsing_service.process_resume,
+        resume.id,
+        Path(resume.file_url),
     )
 
     return {
