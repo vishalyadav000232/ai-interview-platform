@@ -2,17 +2,24 @@ import logging
 from pathlib import Path
 from uuid import UUID
 
+from app.core.exceptions.exception import (
+    EmptyResumeTextException,
+    ResumeException,
+    ResumeParsedDataInvalidException,
+    ResumeParsingException,
+    ResumeTextExtractionException,
+)
 from app.models.resume import ResumeStatus
 from app.repository.interface.resume import ResumeRepositoryInterface
-from app.services.parser.interface.resume_text_extractor import ResumeTextExtractorInterface
 from app.services.parser.interface.resume_parser import ResumeParserInterface
-
+from app.services.parser.interface.resume_text_extractor import (
+    ResumeTextExtractorInterface,
+)
 
 logger = logging.getLogger(__name__)
 
 
 class ResumeParsingService:
-
     def __init__(
         self,
         resume_repo: ResumeRepositoryInterface,
@@ -42,14 +49,21 @@ class ResumeParsingService:
                 status=ResumeStatus.PROCESSING,
             )
 
-            text = await self.text_extractor.extract_text(file_path)
+            try:
+                text = await self.text_extractor.extract_text(file_path)
+            except Exception as exc:
+                raise ResumeTextExtractionException() from exc
 
-            parsed_data = await self.resume_parser.parse(text)
+            if not text or not text.strip():
+                raise EmptyResumeTextException()
 
-            # Next step:
-            # save parsed_data into resume_profile, resume_skills, etc.
-            
-            print(parsed_data)
+            try:
+                parsed_data = await self.resume_parser.parse(text)
+            except Exception as exc:
+                raise ResumeParsingException() from exc
+
+            if not isinstance(parsed_data, dict):
+                raise ResumeParsedDataInvalidException()
 
             await self.resume_repo.update_parsed_text(
                 resume_id=resume_id,
@@ -69,9 +83,26 @@ class ResumeParsingService:
                 },
             )
 
-        except Exception as exc:
+        except ResumeException as exc:
+            logger.warning(
+                "Resume parsing failed",
+                extra={
+                    "resume_id": str(resume_id),
+                    "file_path": str(file_path),
+                    "error_code": exc.error_code,
+                    "error": exc.message,
+                },
+            )
+
+            await self.resume_repo.update_status(
+                resume_id=resume_id,
+                status=ResumeStatus.FAILED,
+                failure_reason=exc.message,
+            )
+
+        except Exception:
             logger.exception(
-                "Background resume parsing failed",
+                "Unexpected resume parsing error",
                 extra={
                     "resume_id": str(resume_id),
                     "file_path": str(file_path),
@@ -81,5 +112,5 @@ class ResumeParsingService:
             await self.resume_repo.update_status(
                 resume_id=resume_id,
                 status=ResumeStatus.FAILED,
-                failure_reason=str(exc),
+                failure_reason="Unexpected resume parsing error",
             )
