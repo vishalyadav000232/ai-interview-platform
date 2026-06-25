@@ -93,7 +93,7 @@ class ResumeService(ResumeServiceInterface):
                 upload_source="local",
             )
 
-            return await self.resume_repo.create(resume=resume)
+            return await self.resume_repo.create(resume)
 
         except Exception:
             logger.exception(

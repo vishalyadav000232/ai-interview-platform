@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped , mapped_column , relationship
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy import ForeignKey , String , DateTime , func , UniqueConstraint
 
-class ResumeSkills(Base):
+class ResumeSkill(Base):
     
     __tablename__="resume_skills"
     
