@@ -11,7 +11,7 @@ from app.database.session import AsyncLoaclSession , engine
 from app.apis.route import router as main_router
 from sqlalchemy import text
 
-from app.core.exception_builder import register_exception_handlers
+from app.core.exceptions.exception_builder import register_exception_handlers
 
 setup_logging()
 
