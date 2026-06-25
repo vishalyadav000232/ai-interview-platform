@@ -11,6 +11,7 @@ from app.database.session import AsyncLoaclSession , engine
 from app.apis.route import router as main_router
 from sqlalchemy import text
 
+from app.core.exception_builder import register_exception_handlers
 
 setup_logging()
 
@@ -83,15 +84,6 @@ async def health():
     
 app.include_router(main_router)
 
+register_exception_handlers(app=app)
 
-@app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
-    logger.exception(f"Unhandled error: {exc}")
 
-    return JSONResponse(
-        status_code=500,
-        content={
-            "success": False,
-            "message": "Internal server error",
-        },
-    )

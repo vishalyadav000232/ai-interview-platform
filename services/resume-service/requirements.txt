@@ -19,3 +19,5 @@ asgi-lifespan
 pytest-cov
 
 alembic
+
+pymupdf
