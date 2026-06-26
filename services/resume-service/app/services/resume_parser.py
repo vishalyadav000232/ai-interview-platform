@@ -39,7 +39,7 @@ class ResumeParsingService:
         resume_Profile_repo : ResumeProfileRepositoryInterface,
         skill_repo : ResumeSkillRepositoryInterface,
         edu_repo : ResumeEducationRepositoryInterface,
-        project_repo : ResumeProj
+        
         
     ):
         self.resume_repo = resume_repo
