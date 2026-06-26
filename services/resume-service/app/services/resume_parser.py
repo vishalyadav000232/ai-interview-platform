@@ -2,8 +2,6 @@ import logging
 from pathlib import Path
 from uuid import UUID
 
-
-
 from app.core.exceptions.exception import (
     EmptyResumeTextException,
     ResumeException,
@@ -11,23 +9,24 @@ from app.core.exceptions.exception import (
     ResumeParsingException,
     ResumeTextExtractionException,
 )
+
+
 from app.models.resume import ResumeStatus
 from app.repository.interface.resume import ResumeRepositoryInterface
 from app.services.parser.interface.resume_parser import ResumeParserInterface
-from app.services.parser.interface.resume_text_extractor import (
-    ResumeTextExtractorInterface,
-)
+from app.services.parser.interface.resume_text_extractor import ResumeTextExtractorInterface
 from app.repository.interface.resume_education import ResumeEducationRepositoryInterface
 from app.repository.interface.resume_profile import ResumeProfileRepositoryInterface
 from app.repository.interface.resume_skill import ResumeSkillRepositoryInterface
-from app.models.resume_skills import ResumeSkill
-from app.models.resume_education import ResumeEducation
+from app.repository.interface.resume_project import ResumeProjectRepositoryInterface
 
-logger = logging.getLogger(__name__)
 
 from app.models.resume_profile import ResumeProfile
 from app.models.resume_project import ResumeProject
+from app.models.resume_education import ResumeEducation
+from app.models.resume_skills import ResumeSkill
 
+logger = logging.getLogger(__name__)
 
 
 class ResumeParsingService:
@@ -39,6 +38,7 @@ class ResumeParsingService:
         resume_Profile_repo : ResumeProfileRepositoryInterface,
         skill_repo : ResumeSkillRepositoryInterface,
         edu_repo : ResumeEducationRepositoryInterface,
+        project_repo : ResumeProjectRepositoryInterface,
         
         
     ):
@@ -48,6 +48,7 @@ class ResumeParsingService:
         self.resume_profile = resume_Profile_repo
         self.skill_repo = skill_repo
         self.education_repo = edu_repo
+        self.project_repo = project_repo
 
     async def process_resume(
         self,
@@ -89,6 +90,7 @@ class ResumeParsingService:
                         phone=parsed_profile.get("phone"),
                         linkedin_url=parsed_profile.get("linkedin_url"),
                         github_url=parsed_profile.get("github_url"),
+                        professional_summary = parsed_profile.get("professional_summary")
                     )
 
                 
@@ -119,6 +121,21 @@ class ResumeParsingService:
                 ]
 
                 await self.education_repo.bulk_create(educations)
+                
+                
+                
+                projects = [
+                    ResumeProject(
+                        resume_id = resume_id,
+                        project_name = proj.get("project_name"),
+                        technologies = proj.get("technologies"),
+                        project_url = proj.get("project_url"),
+                        description = proj.get("description")
+                        
+                    ) for proj in parsed_data.get("projects" , [])
+                ]
+                
+                await self.project_repo.bulk_create(projects)
                 
                                 
                 
