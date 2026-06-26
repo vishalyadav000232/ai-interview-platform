@@ -2,6 +2,8 @@ import logging
 from pathlib import Path
 from uuid import UUID
 
+
+
 from app.core.exceptions.exception import (
     EmptyResumeTextException,
     ResumeException,
@@ -15,8 +17,17 @@ from app.services.parser.interface.resume_parser import ResumeParserInterface
 from app.services.parser.interface.resume_text_extractor import (
     ResumeTextExtractorInterface,
 )
+from app.repository.interface.resume_education import ResumeEducationRepositoryInterface
+from app.repository.interface.resume_profile import ResumeProfileRepositoryInterface
+from app.repository.interface.resume_skill import ResumeSkillRepositoryInterface
+from app.models.resume_skills import ResumeSkill
+from app.models.resume_education import ResumeEducation
 
 logger = logging.getLogger(__name__)
+
+from app.models.resume_profile import ResumeProfile
+from app.models.resume_project import ResumeProject
+
 
 
 class ResumeParsingService:
@@ -25,10 +36,18 @@ class ResumeParsingService:
         resume_repo: ResumeRepositoryInterface,
         text_extractor: ResumeTextExtractorInterface,
         resume_parser: ResumeParserInterface,
+        resume_Profile_repo : ResumeProfileRepositoryInterface,
+        skill_repo : ResumeSkillRepositoryInterface,
+        edu_repo : ResumeEducationRepositoryInterface,
+        project_repo : ResumeProj
+        
     ):
         self.resume_repo = resume_repo
         self.text_extractor = text_extractor
         self.resume_parser = resume_parser
+        self.resume_profile = resume_Profile_repo
+        self.skill_repo = skill_repo
+        self.education_repo = edu_repo
 
     async def process_resume(
         self,
@@ -61,6 +80,50 @@ class ResumeParsingService:
                 parsed_data = await self.resume_parser.parse(text)
                 
                 print("this is the parse data --> " , parsed_data)
+                
+                parsed_profile = parsed_data.get("profile")
+                profile = ResumeProfile(
+                        resume_id=resume_id,
+                        full_name=parsed_profile.get("full_name"),
+                        email=parsed_profile.get("email"),
+                        phone=parsed_profile.get("phone"),
+                        linkedin_url=parsed_profile.get("linkedin_url"),
+                        github_url=parsed_profile.get("github_url"),
+                    )
+
+                
+                await self.resume_profile.create(profile)
+                
+                
+                skills = [
+                 ResumeSkill(
+                        resume_id=resume_id,
+                        skill_name=skill,
+                    )
+                    for skill in parsed_data.get("skills", [])
+                ]
+
+                await self.skill_repo.bulk_create(skills)
+                
+                print("EDUCATION DATA:", parsed_data.get("educations"))
+                
+                educations = [
+                    ResumeEducation(
+                        resume_id=resume_id,
+                        degree=edu.get("degree"),
+                        institution=edu.get("institution"),
+                        start_year=edu.get("start_year"),
+                        end_year=edu.get("end_year"),
+                    )
+                    for edu in parsed_data.get("educations", [])
+                ]
+
+                await self.education_repo.bulk_create(educations)
+                
+                                
+                
+                
+                
             except Exception as exc:
                 raise ResumeParsingException() from exc
 

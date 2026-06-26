@@ -1,6 +1,6 @@
 from fastapi import Depends
 
-from app.dependencies.repo_deps import get_resume_repo
+from app.dependencies.repo_deps import get_resume_repo , get_resume_profile_repository , get_resume_skill_repository , get_resume_education_repository
 from app.repository.interface.resume import ResumeRepositoryInterface
 
 from app.services.interface.resume_parser import ResumeParsingServiceInterface
@@ -13,8 +13,9 @@ from app.services.parser.extractor.pdf_text_extractor import PDFTextExtractor
 
 from app.services.parser.interface.resume_parser import ResumeParserInterface
 from app.services.parser.parsers.regex_resume_pareser import RegexResumeParser
-
-
+from app.repository.interface.resume_profile import ResumeProfileRepositoryInterface
+from app.repository.interface.resume_skill import ResumeSkillRepositoryInterface
+from app.repository.interface.resume_education import ResumeEducationRepositoryInterface
 async def get_pdf_extractor_service() -> ResumeTextExtractorInterface:
     return PDFTextExtractor()
 
@@ -27,9 +28,15 @@ async def get_resume_parse_service(
     resume_repo: ResumeRepositoryInterface = Depends(get_resume_repo),
     text_extractor: ResumeTextExtractorInterface = Depends(get_pdf_extractor_service),
     resume_parser: ResumeParserInterface = Depends(get_resume_parser),
+    resume_profile : ResumeProfileRepositoryInterface = Depends(get_resume_profile_repository),
+    skill_repo : ResumeSkillRepositoryInterface = Depends(get_resume_skill_repository),
+    edu_repo : ResumeEducationRepositoryInterface = Depends(get_resume_education_repository)
 ) -> ResumeParsingServiceInterface:
     return ResumeParsingService(
         resume_repo=resume_repo,
         text_extractor=text_extractor,
         resume_parser=resume_parser,
+        resume_Profile_repo=resume_profile,
+        skill_repo=skill_repo,
+        edu_repo=edu_repo
     )

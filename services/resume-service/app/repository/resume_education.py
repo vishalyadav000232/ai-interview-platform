@@ -24,15 +24,19 @@ class ResumeEducationRepository(
         educations: list[ResumeEducation],
         commit: bool = True,
     ) -> list[ResumeEducation]:
-        self.db.add_all(educations)
+        try:
+            self.db.add_all(educations)
 
-        if commit:
-            await self.db.commit()
+            if commit:
+                await self.db.commit()
 
-            for education in educations:
-                await self.db.refresh(education)
+                for education in educations:
+                    await self.db.refresh(education)
 
-        return educations
+            return educations
+        except Exception:
+            await self.db.rollback()
+            raise
 
     async def get_by_resume_id(
         self,
@@ -51,12 +55,17 @@ class ResumeEducationRepository(
         resume_id: UUID,
         commit: bool = True,
     ) -> None:
-        await self.db.execute(
-            delete(ResumeEducation).where(
-                ResumeEducation.resume_id == resume_id
+        try:
+            await self.db.execute(
+                delete(ResumeEducation).where(
+                    ResumeEducation.resume_id == resume_id
+                )
             )
-        )
 
-        if commit:
-            await self.db.commit()
-            
+            if commit:
+                await self.db.commit()
+                
+        except Exception:
+            await self.db.rollback()
+            raise
+                
