@@ -41,3 +41,23 @@ class ResumeAnalysisRepository(
                 resume_id,
             )
             raise
+    async def get_latest_by_resume_id(
+        self,
+        resume_id: UUID,
+    ) -> ResumeAnalysis | None:
+        try:
+            stmt = (
+                select(ResumeAnalysis)
+                .where(ResumeAnalysis.resume_id == resume_id)
+                .order_by(ResumeAnalysis.created_at.desc())
+                .limit(1)
+            )
+
+            result = await self.db.execute(stmt)
+            return result.scalar_one_or_none()
+        
+        except Exception as e:
+            logger.exception(
+                "Failed to fetch resume analysis for resume_id=%s",
+                resume_id
+            )

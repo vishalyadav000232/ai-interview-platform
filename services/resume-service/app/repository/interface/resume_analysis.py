@@ -13,4 +13,8 @@ class ResumeAnalysisRepositoryInterface(
     @abstractmethod
     async def get_by_resume_id(self, resume_id : UUID)-> list[ResumeAnalysis]:
         pass
+    
+    @abstractmethod
+    async def get_latest_by_resume_id(self , resume_id : UUID)-> ResumeAnalysis:
+        pass
       
