@@ -29,7 +29,7 @@ class ResumeSkillRepository(
             for skill in skills:
                 await self.db.refresh(skill)
         else:
-            self.db.flush()
+            await self.db.flush()
 
         return skills
 

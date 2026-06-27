@@ -63,3 +63,7 @@ class BaseRepositoryInterface(ABC, Generic[ModelType]):
     @abstractmethod
     async def rollback(self )->None:
         pass
+    
+    @abstractmethod
+    async def commit(self)-> None:
+        pass

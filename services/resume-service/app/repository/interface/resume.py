@@ -2,9 +2,11 @@ from abc import ABC, abstractmethod
 from uuid import UUID
 
 from app.models.resume import Resume, ResumeStatus
+from app.repository.interface.base import BaseRepositoryInterface
 
-
-class ResumeRepositoryInterface(ABC):
+class ResumeRepositoryInterface(
+    BaseRepositoryInterface,
+    ABC):
 
     @abstractmethod
     async def create(self, resume: Resume) -> Resume:

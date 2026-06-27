@@ -45,7 +45,7 @@ async def get_resume_parse_service(
         resume_repo=resume_repo,
         text_extractor=text_extractor,
         resume_parser=resume_parser,
-        resume_Profile_repo=resume_profile,
+        resume_profile_repo=resume_profile,
         skill_repo=skill_repo,
         edu_repo=edu_repo,
         project_repo=project_repo,

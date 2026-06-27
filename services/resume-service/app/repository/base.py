@@ -162,14 +162,14 @@ class BaseRepository(BaseRepositoryInterface[ModelType], Generic[ModelType]):
     
     async def rollback(self):
         try:
-            self.db.rollback()
+            await self.db.rollback()
         except Exception:
             logger.exception("Failed to rollback data trancsaction ")
             raise
     
     async def commit(self)->None:
         try:
-            self.db.commit()
+            await self.db.commit()
         except Exception:
             logger.exception(
                 "Failed to rollback database transaction"
