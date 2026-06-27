@@ -13,20 +13,25 @@ class ResumeExprienceRepository(
         super().__init__(db, ResumeExperience)
 
     async def bulk_create(
-        self,
-        expriences: list[ResumeExperience],
-        commit: bool = True,
-    ) -> list[ResumeExperience]:
+    self,
+    experiences: list[ResumeExperience],
+    commit: bool = True,
+) -> list[ResumeExperience]:
+        if not experiences:
+            return []
+
         try:
-            self.db.add_all(expriences)
+            self.db.add_all(experiences)
 
             if commit:
                 await self.db.commit()
 
-                for exp in expriences:
+                for exp in experiences:
                     await self.db.refresh(exp)
+            else:
+                await self.db.flush()
 
-            return expriences
+            return experiences
 
         except Exception:
             await self.db.rollback()

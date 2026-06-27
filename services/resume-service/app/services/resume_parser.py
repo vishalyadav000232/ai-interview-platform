@@ -19,12 +19,14 @@ from app.repository.interface.resume_education import ResumeEducationRepositoryI
 from app.repository.interface.resume_profile import ResumeProfileRepositoryInterface
 from app.repository.interface.resume_skill import ResumeSkillRepositoryInterface
 from app.repository.interface.resume_project import ResumeProjectRepositoryInterface
-
+from app.repository.interface.resume_expriennc import ResumeExprienceRepositoryInteraface
 
 from app.models.resume_profile import ResumeProfile
 from app.models.resume_project import ResumeProject
 from app.models.resume_education import ResumeEducation
 from app.models.resume_skills import ResumeSkill
+from app.models.resume_exprience import ResumeExperience
+
 
 logger = logging.getLogger(__name__)
 
@@ -39,7 +41,7 @@ class ResumeParsingService:
         skill_repo : ResumeSkillRepositoryInterface,
         edu_repo : ResumeEducationRepositoryInterface,
         project_repo : ResumeProjectRepositoryInterface,
-        
+        exp_repo : ResumeExprienceRepositoryInteraface,
         
     ):
         self.resume_repo = resume_repo
@@ -49,6 +51,7 @@ class ResumeParsingService:
         self.skill_repo = skill_repo
         self.education_repo = edu_repo
         self.project_repo = project_repo
+        self.exp_repo = exp_repo
 
     async def process_resume(
         self,
@@ -137,6 +140,27 @@ class ResumeParsingService:
                 
                 await self.project_repo.bulk_create(projects)
                 
+                
+                print("thhis is tje experiences", parsed_data.get("experiences" , []))
+                
+
+                experiences = [
+                ResumeExperience(
+                    resume_id=resume_id,
+                    company_name=exp.get("company_name"),
+                    job_title=exp.get("job_title"),
+            
+                    location=exp.get("location"),
+                    start_date=exp.get("start_date"),
+                    end_date=exp.get("end_date"),
+                    
+                    description=exp.get("description"),
+                )
+                for exp in parsed_data.get("experiences", [])
+            ]
+
+                if experiences:
+                    await self.exp_repo.bulk_create(experiences)
                                 
                 
                 
