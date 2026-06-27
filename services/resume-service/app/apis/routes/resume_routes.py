@@ -187,3 +187,13 @@ async def download_resume(
         media_type="application/octet-stream",
     )
     
+    
+from app.services.resume_analysis.interface.analysis import ResumeAnalysisServiceInterface
+from app.dependencies.service_deps import get_resume_analysis_service
+    
+@router.post("/{resume_id}/analyze")
+async def analyze_resume(
+    resume_id: UUID,
+    service: ResumeAnalysisServiceInterface = Depends(get_resume_analysis_service),
+):
+    return await service.analyze_resume(resume_id)

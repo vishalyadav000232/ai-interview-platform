@@ -8,6 +8,7 @@ from app.repository.interface.resume_analysis import ResumeAnalysisRepositoryInt
 from app.repository.interface.resume_expriennc import (
     ResumeExprienceRepositoryInteraface,
 )
+from app.repository.interface.resume_project import ResumeProjectRepositoryInterface
 
 from app.dependencies.repo_deps import (
     get_resume_repo,
@@ -16,6 +17,7 @@ from app.dependencies.repo_deps import (
     get_resume_education_repository,
     get_resume_analysis_repo,
     get_resume_exp_repository,
+    get_resume_project_repository,
 )
 
 from app.services.interface.resume import ResumeServiceInterface
@@ -64,6 +66,7 @@ def get_resume_analysis_service(
     analysis_repo: ResumeAnalysisRepositoryInterface = Depends(
         get_resume_analysis_repo
     ),
+    project_repo : ResumeProjectRepositoryInterface = Depends(get_resume_project_repository),
 ) -> ResumeAnalysisServiceInterface:
     return ResumeAnalysisService(
         resume_repo=resume_repo,
@@ -72,4 +75,5 @@ def get_resume_analysis_service(
         education_repo=education_repo,
         experience_repo=experience_repo,
         analysis_repo=analysis_repo,
+        project_repo=project_repo
     )
