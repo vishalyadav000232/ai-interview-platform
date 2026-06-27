@@ -60,3 +60,6 @@ class BaseRepositoryInterface(ABC, Generic[ModelType]):
         obj: ModelType,
     ) -> ModelType:
         pass
+    @abstractmethod
+    async def rollback(self )->None:
+        pass

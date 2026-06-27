@@ -29,9 +29,15 @@ class ResumeEducationRepository(
 
             if commit:
                 await self.db.commit()
+            
 
                 for education in educations:
                     await self.db.refresh(education)
+                    
+            else:
+                await self.db.flush()
+                
+                
 
             return educations
         except Exception:
@@ -64,6 +70,8 @@ class ResumeEducationRepository(
 
             if commit:
                 await self.db.commit()
+            else:
+                await self.db.flush()
                 
         except Exception:
             await self.db.rollback()

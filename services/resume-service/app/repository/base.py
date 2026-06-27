@@ -37,6 +37,8 @@ class BaseRepository(BaseRepositoryInterface[ModelType], Generic[ModelType]):
             if commit:
                 await self.db.commit()
                 await self.db.refresh(obj)
+            else:
+                await self.db.flush()
 
             return obj
 
@@ -100,6 +102,8 @@ class BaseRepository(BaseRepositoryInterface[ModelType], Generic[ModelType]):
             if commit:
                 await self.db.commit()
                 await self.db.refresh(obj)
+            else:
+                await self.db.flush()
 
             return obj
 
@@ -121,6 +125,8 @@ class BaseRepository(BaseRepositoryInterface[ModelType], Generic[ModelType]):
 
             if commit:
                 await self.db.commit()
+            else:
+                await self.db.flush()
 
         except Exception:
             await self.db.rollback()
@@ -153,3 +159,19 @@ class BaseRepository(BaseRepositoryInterface[ModelType], Generic[ModelType]):
                 self.model.__name__,
             )
             raise
+    
+    async def rollback(self):
+        try:
+            self.db.rollback()
+        except Exception:
+            logger.exception("Failed to rollback data trancsaction ")
+            raise
+    
+    async def commit(self)->None:
+        try:
+            self.db.commit()
+        except Exception:
+            logger.exception(
+                "Failed to rollback database transaction"
+            )
+        

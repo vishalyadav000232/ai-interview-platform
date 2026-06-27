@@ -27,6 +27,8 @@ class ResumeProjectRepository(
 
             for skill in projects:
                 await self.db.refresh(skill)
+        else:
+            await self.db.flush()
 
         return projects
 
@@ -55,3 +57,5 @@ class ResumeProjectRepository(
 
         if commit:
             await self.db.commit()
+        else:
+            await self.db.flush()

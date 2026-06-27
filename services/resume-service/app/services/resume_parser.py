@@ -153,6 +153,7 @@ class ResumeParsingService:
                     location=exp.get("location"),
                     start_date=exp.get("start_date"),
                     end_date=exp.get("end_date"),
+                    emplyoee_type = exp.get("emplyoee_type"),
                     
                     description=exp.get("description"),
                 )

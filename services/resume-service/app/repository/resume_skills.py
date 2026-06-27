@@ -28,6 +28,8 @@ class ResumeSkillRepository(
 
             for skill in skills:
                 await self.db.refresh(skill)
+        else:
+            self.db.flush()
 
         return skills
 
@@ -56,3 +58,5 @@ class ResumeSkillRepository(
 
         if commit:
             await self.db.commit()
+        else:
+            await self.db.flush()
