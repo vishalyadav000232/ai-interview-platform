@@ -15,6 +15,7 @@ from app.models.resume_profile import ResumeProfile
 from app.models.resume_skills import ResumeSkill
 from app.models.resume_education import ResumeEducation
 from app.models.resume_project import ResumeProject
+from app.models.resume_analysis import ResumeAnalysis
 
 from app.models.resume_exprience import ResumeExperience
 # this is the Alembic Config object, which provides
