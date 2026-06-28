@@ -13,4 +13,5 @@ class ResumeAnalysisServiceInterface(ABC):
         self , 
         resume_id : UUID   
     ):
+        ''' analyze the resume and retrun the anlyze'''
         pass

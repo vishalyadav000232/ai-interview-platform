@@ -1,10 +1,10 @@
 from datetime import datetime
 from uuid import UUID as PyUUID, uuid4
 
-from sqlalchemy import DateTime, ForeignKey, Numeric, String, func
+from sqlalchemy import DateTime, ForeignKey, Numeric, String, func  , Integer
 from sqlalchemy.dialects.postgresql import ARRAY, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
+from decimal import Decimal
 from app.database.base import Base
 
 
@@ -26,52 +26,52 @@ class ResumeAnalysis(Base):
         index=True,
     )
 
-    overall_score: Mapped[float] = mapped_column(
-        Numeric(5, 2),
-        nullable=False,
-        default=0,
+    overall_score: Mapped[Decimal] = mapped_column(
+          Numeric(5, 2),
+    nullable=False,
+    default=Decimal("0.00"),
     )
 
-    profile_score: Mapped[float] = mapped_column(
-        Numeric(5, 2),
-        nullable=False,
-        default=0,
+    profile_score: Mapped[Decimal] = mapped_column(
+           Numeric(5, 2),
+    nullable=False,
+    default=Decimal("0.00"),
     )
 
-    skills_score: Mapped[float] = mapped_column(
-        Numeric(5, 2),
-        nullable=False,
-        default=0,
+    skills_score: Mapped[Decimal] = mapped_column(
+          Numeric(5, 2),
+    nullable=False,
+    default=Decimal("0.00"),
     )
 
-    education_score: Mapped[float] = mapped_column(
-        Numeric(5, 2),
-        nullable=False,
-        default=0,
+    education_score: Mapped[Decimal] = mapped_column(
+           Numeric(5, 2),
+    nullable=False,
+    default=Decimal("0.00"),
     )
 
-    experience_score: Mapped[float] = mapped_column(
-        Numeric(5, 2),
-        nullable=False,
-        default=0,
+    experience_score: Mapped[Decimal] = mapped_column(
+           Numeric(5, 2),
+    nullable=False,
+    default=Decimal("0.00"),
     )
 
-    projects_score: Mapped[float] = mapped_column(
-        Numeric(5, 2),
-        nullable=False,
-        default=0,
+    projects_score: Mapped[Decimal] = mapped_column(
+           Numeric(5, 2),
+    nullable=False,
+    default=Decimal("0.00"),
     )
 
-    resume_completeness: Mapped[float] = mapped_column(
-        Numeric(5, 2),
-        nullable=False,
-        default=0,
+    resume_completeness: Mapped[Decimal] = mapped_column(
+          Numeric(5, 2),
+    nullable=False,
+    default=Decimal("0.00"),
     )
 
-    keyword_match_percentage: Mapped[float] = mapped_column(
-        Numeric(5, 2),
-        nullable=False,
-        default=0,
+    keyword_match_percentage: Mapped[Decimal] = mapped_column(
+         Numeric(5, 2),
+    nullable=False,
+    default=Decimal("0.00"),
     )
 
     missing_skills: Mapped[list[str]] = mapped_column(
@@ -111,6 +111,7 @@ class ResumeAnalysis(Base):
     )
 
     analysis_time_ms: Mapped[int | None] = mapped_column(
+        Integer,
         nullable=True,
     )
 
