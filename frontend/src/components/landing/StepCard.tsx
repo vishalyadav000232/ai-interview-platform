@@ -1,14 +1,13 @@
 import type { LucideIcon } from "lucide-react";
-
 type StepCardProps = {
-  step: number;
+  step: string;
   icon: LucideIcon;
   title: string;
   description: string;
 };
 
 const StepCard = ({
-  step,
+  step ,
   icon: Icon,
   title,
   description,

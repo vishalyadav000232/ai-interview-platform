@@ -9,6 +9,7 @@ import {
 import StepCard from "../../../components/landing/StepCard";
 import { Connector } from "../../../components/landing/Conecter";
 
+
 const steps = [
   {
     step: "1",
