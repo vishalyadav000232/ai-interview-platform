@@ -1,7 +1,8 @@
 import {createBrowserRouter , RouterProvider} from "react-router-dom";
-import { LandingPage } from "../pages/Landing/LandingPage";
+
 import { LoginPage } from "../pages/Login/LoginPage";
 import { RegisterPage } from "../pages/Register/RegisterPage";
+import LandingPage from "../pages/Landing/LandingPage";
 
 
 
