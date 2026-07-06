@@ -14,7 +14,7 @@ function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 border-b border-white/20 bg-[#000204]/90 text-white backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-white/5  bg-[#000204] text-white backdrop-blur-md">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 md:px-6">
         {/* Logo */}
         <Link to="/" className="flex items-center gap-2 text-xl font-bold">
