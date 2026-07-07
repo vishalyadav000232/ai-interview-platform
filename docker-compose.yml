@@ -1,0 +1,91 @@
+services:
+
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api-gateway
+    env_file:
+      - ./api-gateway/.env
+    ports:
+      - "8000:8000"
+    depends_on:
+      - auth-service
+    restart: unless-stopped
+
+    
+  auth-service:
+    build:
+      context: ./services/auth-service
+    container_name: auth-service
+    env_file:
+      - ./services/auth-service/.env
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./services/auth-service/app:/app/app
+      - ./services/auth-service/migrations:/app/migrations
+      - ./services/auth-service/alembic.ini:/app.alembic.ini
+      - ./services/auth-service/tests:/app/tests
+      - ./services/auth-service/pytest.ini:/app/pytest.ini
+    depends_on:
+      - postgres
+
+    
+  resume-service:
+    build:
+      context: ./services/resume-service
+    container_name: resume-service
+    env_file:
+      - ./services/resume-service/.env
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./services/resume-service/app:/app/app
+      - ./services/resume-service/migrations:/app/migrations
+      - ./services/resume-service/alembic.ini:/app/alembic.ini
+      - ./services/resume-service/uploads:/app/uploads
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:16
+    container_name: ai-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: vishal123
+      POSTGRES_DB: auth_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  
+  postgres-test:
+    image: postgres:16
+    container_name: ai-postgres-test
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: vishal123
+      POSTGRES_DB: auth_test_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: ai-redis
+    ports:
+    - "6379:6379"
+    
+  
+
+      
+
+
+volumes:
+  postgres_data:
+  postgres_test_data:
+
+  
