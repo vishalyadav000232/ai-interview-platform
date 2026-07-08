@@ -3,11 +3,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema, type RegisterFormData } from "../schemas/register/shemas";
 
-import {
-  registerSchema,
-  type RegisterFormData,
-} from "../../schemas/register/shemas"
 
 export const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);

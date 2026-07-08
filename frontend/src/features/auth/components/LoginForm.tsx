@@ -3,11 +3,8 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, type LoginFormData } from "../schemas/login/schemas";
 
-import {
-  loginSchema,
-  type LoginFormData,
-} from "../../schemas/login/schemas";
 
 export const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
