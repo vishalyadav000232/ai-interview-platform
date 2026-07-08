@@ -1,11 +1,16 @@
 
 import './App.css'
+import { QueryProvider } from './providers/QueryProvider'
 import AppRoutes from './routes/AppRoutes'
 
 function App() {
 
 
-  return <AppRoutes />
+  return(
+    <QueryProvider>
+      <AppRoutes />
+    </QueryProvider>
+  )
 }
 
 export default App
