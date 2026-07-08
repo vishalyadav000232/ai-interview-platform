@@ -15,11 +15,11 @@ const FeatureCard = ({
 }: FeatureCardProps) => {
   return (
     <div
-      className={`group relative px-6  text-center transition-all duration-300 hover:scale-110 transition-all duration-300 ${
+      className={`group relative px-6 pt-2  text-center transition-all duration-300 hover:scale-110 transition-all duration-300 ${
         !isLast ? "lg:border-r lg:border-white/10" : ""
       }`}
     >
-      <Icon className="mx-auto h-10 w-10 text-violet-500 transition-transform duration-300 group-hover:scale-105" />
+      <Icon className="mx-auto h-10 w-10 md:h-7 md:w-7 text-violet-500 transition-transform duration-400 ease-in group-hover:scale-102" />
 
       <h3 className="mt-6 text-sm font-semibold text-white">
         {title}

@@ -78,7 +78,7 @@ function Hero() {
               <span className="text-sm text-gray-200">AI Feedback Ready</span>
             </div>
 
-            <div className="mt-8 grid grid-cols-3 rounded-2xl border border-white/10 bg-white/[0.03] px-5 py-5 text-center backdrop-blur-xl">
+            <div className="mt-8 grid grid-cols-3 rounded-2xl  px-5 py-5 text-center ">
               <Stat value="5K+" label="Interviews" />
               <Stat value="95%" label="Success Rate" border />
               <Stat value="50+" label="Companies" />
