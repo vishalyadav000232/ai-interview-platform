@@ -1,4 +1,4 @@
-export type UserRole = "student" | "admin"
+export type UserRole = "STUDENT" | "ADMIN";
 
 export type AuthUser = {
     id: string
@@ -25,7 +25,7 @@ export type RegisterPayload = {
 }
 
 type DataRespone = {
-    user : string,
+    user : AuthUser,
     access_token : string
     verification_link : string
 }

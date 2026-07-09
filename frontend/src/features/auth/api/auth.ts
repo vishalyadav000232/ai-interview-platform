@@ -33,7 +33,7 @@ export const getCurrentUser = async ():Promise<AuthUser>=>{
 
     const res = await baseAPI.get("/auth/me")
 
-    return res?.data
+    return res?.data?.user
 }
 
 export const logoutUser = async (): Promise<void> => {

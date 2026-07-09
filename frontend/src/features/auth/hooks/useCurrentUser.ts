@@ -3,6 +3,7 @@ import { authKeys } from "../api/auth.query"
 import { useAuthStore } from "../store/auth.store"
 import { clearAccessToken, getAccessToken } from "../../../api/auth_token"
 import { useEffect } from "react"
+import type { AuthUser } from "../types/auth"
 
 
 
@@ -22,7 +23,7 @@ export const useCurrentUser = () =>{
     const hasAccessToken =Boolean(getAccessToken())
 
 
-    const query = useQuery(
+    const query = useQuery < AuthUser>(
     {
         queryKey : authKeys.me(),
             enabled: hasAccessToken,
@@ -56,6 +57,9 @@ export const useCurrentUser = () =>{
         clearUser,
         setLoading,
     ])
+
+
+    return query
 
 
 
