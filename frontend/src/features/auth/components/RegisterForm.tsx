@@ -4,11 +4,16 @@ import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { registerSchema, type RegisterFormData } from "../schemas/register/shemas";
+import { email } from "zod";
+import type { RegisterPayload } from "../types/auth";
+import { useRegister } from "../hooks/useRegister";
 
 
 export const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const registerMutation = useRegister()
 
   const {
     register,
@@ -26,7 +31,22 @@ export const RegisterForm = () => {
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    console.log("Register Data:", data);
+    if (data?.password == data?.confirmPassword){
+
+
+      const pyload: RegisterPayload = {
+        first_name : data?.first_name,
+        last_name : data?.last_name,
+        email : data?.email,
+        password : data?.password
+
+      }
+
+      registerMutation.mutate(pyload)
+      console.log(registerMutation.data)
+
+
+    }
   };
 
   return (

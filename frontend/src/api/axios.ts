@@ -1,6 +1,7 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios"
 import { env } from "../config/env"
 import { clearAccessToken, getAccessToken, setAccessToken } from "./auth_token"
+import { notify } from "../shared/lib/toast"
 
 
 
@@ -47,48 +48,68 @@ type RetryAxiosRequestConfig = InternalAxiosRequestConfig & {
     _retry?: boolean
 }
 
+type ApiErrorResponse = {
+    message?: string;
+    detail?: string;
+};
 
 baseAPI.interceptors.response.use(
     (response) => response,
 
-    async (error: AxiosError) => {
-        const originalRequest = error.config as RetryAxiosRequestConfig
+    async (error: AxiosError<ApiErrorResponse>) => {
+        const originalRequest = error.config as RetryAxiosRequestConfig;
 
         if (!error.response) {
-            return Promise.reject(error)
+            notify.error("Network error. Please check your internet.");
+            return Promise.reject(error);
         }
 
-        const status = error.response.status
+        const status = error.response.status;
 
         if (
             status === 401 &&
             originalRequest &&
             !originalRequest._retry &&
-            !originalRequest.url?.includes("/auth/refresh")
+            !originalRequest.url?.includes("/auth/refresh")&&
+            !originalRequest.url?.includes("auth/login")&&
+            !originalRequest.url?.includes("auth/register")
+
         ) {
-            originalRequest._retry = true
+            originalRequest._retry = true;
 
             try {
                 const refreshResponse = await baseAPI.post<RefreshResponse>(
-                    "/auth/refresh",
-                )
+                    "/auth/refresh"
+                );
 
-                const newAccessToken = refreshResponse?.data?.data?.access_token
+                const newAccessToken =
+                    refreshResponse.data?.data?.access_token;
 
-                setAccessToken(newAccessToken)
+                if (!newAccessToken) {
+                    throw new Error("Access token missing");
+                }
 
-                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
+                setAccessToken(newAccessToken);
 
-                return baseAPI(originalRequest)
+                originalRequest.headers = originalRequest.headers ?? {};
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+                return baseAPI(originalRequest);
             } catch (refreshError) {
-                clearAccessToken()
+                clearAccessToken();
+                window.location.href = "/login";
 
-                window.location.href = "/login"
-
-                return Promise.reject(refreshError)
+                return Promise.reject(refreshError);
             }
         }
 
-        return Promise.reject(error)
-    },
-)
+        const message =
+            error.response.data?.message ||
+            error.response.data?.detail ||
+            "Something went wrong";
+
+        notify.error(message);
+
+        return Promise.reject(error);
+    }
+);

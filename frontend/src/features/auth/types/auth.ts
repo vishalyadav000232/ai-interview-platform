@@ -1,0 +1,56 @@
+export type UserRole = "student" | "admin"
+
+export type AuthUser = {
+    id: string
+    first_name : string,
+    last_name : string
+    email: string
+    role: UserRole
+    is_email_verified: boolean
+    is_active: boolean
+    created_at: string
+
+}
+
+export type LoginPayload = {
+    email: string
+    password: string
+}
+
+export type RegisterPayload = {
+    first_name:string,
+    last_name : string,
+    email: string
+    password: string
+}
+
+type DataRespone = {
+    user : string,
+    access_token : string
+    verification_link : string
+}
+
+export type AuthResponse = {
+    success : boolean,
+    message: string
+    data: DataRespone
+}
+
+export type CurrentUserResponse = {
+    user: AuthUser
+}
+
+
+export type AuthState = {
+    user: AuthUser | null;
+
+    isAuthenticated: boolean;
+
+    isLoading: boolean;
+
+    setUser(user: AuthUser): void;
+
+    clearUser(): void;
+
+    setLoading(value: boolean): void;
+}
