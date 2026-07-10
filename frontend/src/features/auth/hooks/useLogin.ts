@@ -1,35 +1,42 @@
-import { useMutation } from "@tanstack/react-query"
-import { loginUser } from "../api/auth"
-import { setAccessToken } from "../../../api/auth_token"
-import { notify } from "../../../shared/lib/toast"
-import { useNavigate } from "react-router-dom"
+import { useMutation } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+
+import { loginUser } from "../api/auth";
+import { setAccessToken } from "../../../api/auth_token";
+import { notify } from "../../../shared/lib/toast";
+import { useAuthStore } from "../store/auth.store";
 
 export const useLogin = () => {
-    const navigation = useNavigate()
+    const navigate = useNavigate();
+    const setUser = useAuthStore((state) => state.setUser);
+    const setLoading = useAuthStore((state) => state.setLoading);
+
     return useMutation({
         mutationKey: ["login"],
         mutationFn: loginUser,
         retry: false,
 
         onSuccess: (response) => {
+            if (!response?.success) return;
 
-            if(response?.success){
-                const accessToken = response?.data?.access_token
+            const accessToken = response.data.access_token;
+            const user = response.data.user;
 
-                notify.success(response?.message)
-                navigation("/dashboard")
-
-
-
-                if (accessToken) {
-                    setAccessToken(accessToken)
-                }
+            if (accessToken) {
+                setAccessToken(accessToken);
             }
 
+            setUser(user);
+            setLoading(false);
+
+            notify.success(response.message);
+
+            navigate("/dashboard", { replace: true });
         },
 
         onError: (error) => {
-            console.error("Login failed:", error)
+            console.error("Login failed:", error);
+            notify.error(error?.message);
         },
-    })
-}
+    });
+};
