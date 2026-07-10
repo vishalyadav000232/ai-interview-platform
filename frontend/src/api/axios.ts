@@ -20,6 +20,7 @@ export const baseAPI = axios.create({
 baseAPI.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         const token = getAccessToken()
+        console.log("this is the token from the " , token)
 
         if (token) {
             config.headers.Authorization = `Bearer ${token}`

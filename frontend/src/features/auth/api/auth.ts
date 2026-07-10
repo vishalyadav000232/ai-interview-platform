@@ -1,8 +1,8 @@
 import { baseAPI } from "../../../api/axios"
-import type { AuthResponse, AuthUser, LoginPayload, RegisterPayload } from "../types/auth"
+import type { LoginResponse, AuthUser, LoginPayload, RegisterPayload  , RegisterResponse} from "../types/auth"
 
 
-export const loginUser = async (payload : LoginPayload) : Promise<AuthResponse> =>{
+export const loginUser = async (payload : LoginPayload) : Promise<LoginResponse> =>{
     const formData = new URLSearchParams();
 
     formData.append("username", payload.email);
@@ -21,8 +21,8 @@ export const loginUser = async (payload : LoginPayload) : Promise<AuthResponse> 
 
 export const registerUser = async (
     payload: RegisterPayload,
-): Promise<AuthResponse> => {
-    const response = await baseAPI.post<AuthResponse>("/auth/register", payload)
+): Promise<RegisterResponse> => {
+    const response = await baseAPI.post<RegisterResponse>("/auth/register", payload)
 
     return response.data
 }

@@ -1,46 +1,37 @@
-import { useQuery } from "@tanstack/react-query"
-import { authKeys } from "../api/auth.query"
-import { useAuthStore } from "../store/auth.store"
-import { clearAccessToken, getAccessToken } from "../../../api/auth_token"
-import { useEffect } from "react"
-import type { AuthUser } from "../types/auth"
+import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
+import { authQueries } from "../api/auth.query";
+import { useAuthStore } from "../store/auth.store";
+import {
+    clearAccessToken,
+    getAccessToken,
+} from "../../../api/auth_token";
 
+export const useCurrentUser = () => {
+    const setUser = useAuthStore((state) => state.setUser);
+    const clearUser = useAuthStore((state) => state.clearUser);
+    const setLoading = useAuthStore((state) => state.setLoading);
 
+    const hasAccessToken = Boolean(getAccessToken());
 
+    const query = useQuery({
+        ...authQueries.me(),
+        enabled: hasAccessToken,
+        retry: false,
+    });
 
-
-
-
-
-export const useCurrentUser = () =>{
-
-
-    const setUser = useAuthStore(state=>state?.setUser)
-    const clearUser = useAuthStore(state=>state?.clearUser)
-    const setLoading = useAuthStore(state=>state?.setLoading)
-
-    const hasAccessToken =Boolean(getAccessToken())
-
-
-    const query = useQuery < AuthUser>(
-    {
-        queryKey : authKeys.me(),
-            enabled: hasAccessToken,
-            retry:false
-    }
-    )
-
-    useEffect(()=>{
-        if(!hasAccessToken){
-            clearUser()
-            setLoading(false)
+    useEffect(() => {
+        if (!hasAccessToken) {
+            clearUser();
+            setLoading(false);
             return;
         }
 
-        if(query?.isSuccess){
-            setUser(query?.data)
-            setLoading(false)
+        if (query.isSuccess && query.data) {
+            setUser(query.data);
+            setLoading(false);
+            return;
         }
 
         if (query.isError) {
@@ -56,14 +47,7 @@ export const useCurrentUser = () =>{
         setUser,
         clearUser,
         setLoading,
-    ])
+    ]);
 
-
-    return query
-
-
-
-
-
-}
-
+    return query;
+}; 

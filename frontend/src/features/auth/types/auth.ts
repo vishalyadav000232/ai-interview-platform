@@ -30,7 +30,7 @@ type DataRespone = {
     verification_link : string
 }
 
-export type AuthResponse = {
+export type RegisterResponse = {
     success : boolean,
     message: string
     data: DataRespone
@@ -39,6 +39,18 @@ export type AuthResponse = {
 export type CurrentUserResponse = {
     user: AuthUser
 }
+
+export type LoginResponse = {
+    success: boolean;
+    message: string;
+    access_token: string;
+    token_type: "bearer";
+    data: {
+        user: AuthUser;
+        access_token: string;
+        token_type: "bearer";
+    };
+};
 
 
 export type AuthState = {
