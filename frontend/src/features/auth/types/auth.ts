@@ -66,3 +66,18 @@ export type AuthState = {
 
     setLoading(value: boolean): void;
 }
+
+
+
+export type RefreshResponse = {
+    access_token: string;
+    token_type?: string;
+};
+
+
+export type RefreshRes = {
+    success : boolean
+    message : string,
+    data: RefreshResponse
+
+}

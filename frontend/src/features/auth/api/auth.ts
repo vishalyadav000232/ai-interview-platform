@@ -1,5 +1,5 @@
 import { baseAPI } from "../../../api/axios"
-import type { LoginResponse, AuthUser, LoginPayload, RegisterPayload  , RegisterResponse} from "../types/auth"
+import type { LoginResponse, AuthUser, LoginPayload, RegisterPayload  , RegisterResponse, RefreshRes} from "../types/auth"
 
 
 export const loginUser = async (payload : LoginPayload) : Promise<LoginResponse> =>{
@@ -33,9 +33,19 @@ export const getCurrentUser = async ():Promise<AuthUser>=>{
 
     const res = await baseAPI.get("/auth/me")
 
-    return res?.data?.user
+    console.log()
+
+    return res?.data
 }
 
 export const logoutUser = async (): Promise<void> => {
     await baseAPI.post("/auth/logout")
 }
+
+
+
+export const refreshAccessToken = async (): Promise<string> => {
+    const response = await baseAPI.post<RefreshRes>("/auth/refresh");
+
+    return response?.data?.data?.access_token;
+};

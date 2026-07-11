@@ -29,7 +29,8 @@ export const useCurrentUser = () => {
         }
 
         if (query.isSuccess && query.data) {
-            setUser(query.data);
+            console.log("from usegetCurrent " , query?.data)
+            setUser(query?.data);
             setLoading(false);
             return;
         }
@@ -50,4 +51,4 @@ export const useCurrentUser = () => {
     ]);
 
     return query;
-}; 
+};

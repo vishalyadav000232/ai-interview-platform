@@ -6,6 +6,7 @@ import { setAccessToken } from "../../../api/auth_token";
 import { notify } from "../../../shared/lib/toast";
 import { useAuthStore } from "../store/auth.store";
 
+
 export const useLogin = () => {
     const navigate = useNavigate();
 
@@ -27,7 +28,10 @@ export const useLogin = () => {
                 response?.data?.access_token || response?.access_token;
 
             const user = response?.data?.user;
-            
+
+            console.log("login user" , user)
+            console.log("LOGIN ACCEESS TOKEN",accessToken)
+
 
             if (!accessToken || !user) {
                 notify.error("Invalid login response");
@@ -39,6 +43,11 @@ export const useLogin = () => {
             setAccessToken(accessToken);
             setUser(user);
             setLoading(false);
+
+            console.log(
+                "USER AFTER SAVING:",
+                useAuthStore.getState().user
+            );
 
             notify.success(response.message);
 

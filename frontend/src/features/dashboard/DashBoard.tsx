@@ -1,13 +1,27 @@
-import { useAuthStore } from "../auth/store/auth.store"
-
+import { useAuthStore } from "../auth/store/auth.store";
 
 export const DashBoard = () => {
-    const {user} = useAuthStore(state=>state?.user)
-    const {isAuthebtcated} = useAuthStore(state=>state?.isAuthenticated)
+  const user = useAuthStore((state) => state.user);
 
-    console.log("tiis is the user from the auth store" , user)
-    console.log(isAuthebtcated)
+  const isAuthenticated = useAuthStore(
+    (state) => state.isAuthenticated
+  );
+
+  console.log("User from auth store:", user);
+  console.log("Is authenticated:", isAuthenticated);
+
   return (
-    <div>{isAuthebtcated}</div>
-  )
-}
+    <div>
+      <h1>AI Interview Platform</h1>
+
+      {isAuthenticated && user ? (
+        <div>
+          <h2>Welcome, {user.first_name}</h2>
+          <p>{user.email}</p>
+        </div>
+      ) : (
+        <p>User is not authenticated</p>
+      )}
+    </div>
+  );
+};
