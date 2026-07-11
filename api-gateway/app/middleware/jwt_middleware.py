@@ -23,6 +23,10 @@ class JWTValidationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         path = request.url.path
 
+
+        if request.method == "OPTIONS":
+             return await call_next(request)
+
         if (
             path in self.public_path
             or path.startswith("/docs")

@@ -24,6 +24,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if settings.RATE_LIMIT_ENABLED is False:
             return await call_next(request)
 
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         redis: Redis | None = getattr(request.app.state, "redis", None)
 
         if redis is None:
