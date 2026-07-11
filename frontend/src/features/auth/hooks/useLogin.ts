@@ -7,6 +7,7 @@ import { notify } from "../../../shared/lib/toast";
 import { useAuthStore } from "../store/auth.store";
 
 
+
 export const useLogin = () => {
     const navigate = useNavigate();
 
@@ -44,10 +45,7 @@ export const useLogin = () => {
             setUser(user);
             setLoading(false);
 
-            console.log(
-                "USER AFTER SAVING:",
-                useAuthStore.getState().user
-            );
+
 
             notify.success(response.message);
 
@@ -58,6 +56,11 @@ export const useLogin = () => {
 
         onError: (error) => {
             console.error("Login failed:", error);
+
+            if (axios.isAxiosError(error) && error?.response?.status == 401){
+                return
+            }
+
             notify.error(error?.message)       },
     });
 };

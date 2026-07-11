@@ -8,6 +8,8 @@ import {
 
 import { useAuthStore } from "../store/auth.store";
 import { getCurrentUser, refreshAccessToken } from "../api/auth";
+import { notify } from "../../../shared/lib/toast";
+import axios from "axios";
 
 export const useAuthBootstrap = () => {
     const setUser = useAuthStore((state) => state.setUser);
@@ -27,7 +29,17 @@ export const useAuthBootstrap = () => {
 
                 setUser(user);
             } catch (error) {
+
+                console.log(error)
+
+                if (
+                    axios.isAxiosError(error) &&
+                    error.response?.status === 401
+                ) {
+                    return;
+                }
                 console.error("Session restore failed:", error);
+                notify.warning("No active session")
 
                 clearAccessToken();
                 clearUser();

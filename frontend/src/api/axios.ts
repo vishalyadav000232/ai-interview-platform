@@ -20,7 +20,7 @@ export const baseAPI = axios.create({
 baseAPI.interceptors.request.use(
     (config: InternalAxiosRequestConfig) => {
         const token = getAccessToken()
-        console.log("Token inside the insepecter  " , token)
+
 
         if (token) {
             config.headers.Authorization = `Bearer ${token}`
@@ -60,20 +60,35 @@ baseAPI.interceptors.response.use(
     async (error: AxiosError<ApiErrorResponse>) => {
         const originalRequest = error.config as RetryAxiosRequestConfig;
 
+        console.log(error?.config)
+
         if (!error.response) {
             notify.error("Network error. Please check your internet.");
             return Promise.reject(error);
         }
 
+        const requestUrl = originalRequest?.url ?? ""
+
+
+
         const status = error.response.status;
+
+        const isRefreshRequest =
+            requestUrl.includes("/auth/refresh");
+
+        if (status === 401 && isRefreshRequest) {
+            clearAccessToken();
+
+            return Promise.reject(error);
+        }
 
         if (
             status === 401 &&
             originalRequest &&
             !originalRequest._retry &&
-            !originalRequest.url?.includes("/auth/refresh")&&
-            !originalRequest.url?.includes("auth/login")&&
-            !originalRequest.url?.includes("auth/register")
+            !requestUrl.includes("/auth/refresh")&&
+            !requestUrl.includes("/auth/login")&&
+            !requestUrl.includes("/auth/register")
 
         ) {
             originalRequest._retry = true;
@@ -108,6 +123,8 @@ baseAPI.interceptors.response.use(
             error.response.data?.message ||
             error.response.data?.detail ||
             "Something went wrong";
+
+
 
         notify.error(message);
 

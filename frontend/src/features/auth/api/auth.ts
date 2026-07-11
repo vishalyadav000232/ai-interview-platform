@@ -1,5 +1,5 @@
 import { baseAPI } from "../../../api/axios"
-import type { LoginResponse, AuthUser, LoginPayload, RegisterPayload  , RegisterResponse, RefreshRes} from "../types/auth"
+import type { LoginResponse, AuthUser, LoginPayload, RegisterPayload  , RegisterResponse, RefreshRes, LogoutResponse} from "../types/auth"
 
 
 export const loginUser = async (payload : LoginPayload) : Promise<LoginResponse> =>{
@@ -38,8 +38,10 @@ export const getCurrentUser = async ():Promise<AuthUser>=>{
     return res?.data
 }
 
-export const logoutUser = async (): Promise<void> => {
-    await baseAPI.post("/auth/logout")
+export const logoutUser = async (): Promise<LogoutResponse> => {
+    const res = await baseAPI.post("/auth/logout")
+    return res?.data
+
 }
 
 
@@ -49,3 +51,5 @@ export const refreshAccessToken = async (): Promise<string> => {
 
     return response?.data?.data?.access_token;
 };
+
+

@@ -1,3 +1,5 @@
+
+
 export type UserRole = "STUDENT" | "ADMIN";
 
 export type AuthUser = {
@@ -80,4 +82,9 @@ export type RefreshRes = {
     message : string,
     data: RefreshResponse
 
+}
+
+export type LogoutResponse = {
+    success: boolean
+    message: string,
 }

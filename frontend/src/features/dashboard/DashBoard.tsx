@@ -1,3 +1,4 @@
+import { LogoutButton } from "../auth/components/common/LogoutButton";
 import { useAuthStore } from "../auth/store/auth.store";
 
 export const DashBoard = () => {
@@ -13,6 +14,7 @@ export const DashBoard = () => {
   return (
     <div>
       <h1>AI Interview Platform</h1>
+      <LogoutButton/>
 
       {isAuthenticated && user ? (
         <div>
