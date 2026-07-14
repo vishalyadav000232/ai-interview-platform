@@ -48,7 +48,7 @@ function Features() {
 
     <div className="absolute -left-24 top-10 -z-10 h-[420px] w-[420px] rounded-full bg-violet-600/20 blur-[140px]" />
 
-    <div className="grid overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-violet-500/5 bg-amber-200 md:grid-cols-2 lg:grid-cols-6 py-7 gap-4">
+    <div className="grid overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-violet-500/5 md:grid-cols-2 lg:grid-cols-6 py-7 gap-4">
 
       {features.map((feature, index) => (
   <FeatureCard
