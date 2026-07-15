@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, File, UploadFile, status , Header , HTTPException  , BackgroundTasks
-from pathlib import Path 
+from pathlib import Path
 
 from fastapi.responses import FileResponse
 
@@ -24,16 +24,20 @@ router = APIRouter()
 )
 async def upload_resume(
     background_tasks : BackgroundTasks,
-    x_request_id: UUID = Header(...),
+    x_user_id: UUID = Header(...),
     file: UploadFile = File(...),
     parsing_service : ResumeParsingServiceInterface= Depends(get_resume_parse_service),
     resume_service: ResumeServiceInterface = Depends(get_resume_service),
+
+
 ):
+
+    print("this is the user id " , x_user_id)
     resume = await resume_service.upload_resume(
-        user_id=x_request_id,
+        user_id=x_user_id,
         file=file,
     )
-    
+
     background_tasks.add_task(
         parsing_service.process_resume,
         resume.id,
@@ -69,9 +73,9 @@ async def get_my_resume(
     user_id :UUID = Depends(get_current_user_id),
     resume_service: ResumeServiceInterface = Depends(get_resume_service),
 ):
-    
+
     resumes = await resume_service.get_user_resumes(user_id=user_id)
-    
+
     return{
         "success": True,
         "message": "Resumes fetched successfully",
@@ -103,7 +107,7 @@ async def get_resume(
             detail="Resume not found"
         )
 
-    
+
 
     return {
         "success": True,
@@ -147,7 +151,7 @@ async def delete_resume(
         "success": True,
         "message": "Resume deleted successfully",
     }
-    
+
 
 @router.get("/download/{resume_id}")
 async def download_resume(
@@ -168,7 +172,7 @@ async def download_resume(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="You are not allowed to download this resume",
         )
-        
+
     print("resume.file_url =", resume.file_url)
     print("absolute path =", Path(resume.file_url).resolve())
     print("exists =", Path(resume.file_url).exists())
@@ -186,11 +190,11 @@ async def download_resume(
         filename=resume.original_file_name,
         media_type="application/octet-stream",
     )
-    
-    
+
+
 from app.services.resume_analysis.interface.analysis import ResumeAnalysisServiceInterface
 from app.dependencies.service_deps import get_resume_analysis_service
-    
+
 @router.post("/{resume_id}/analyze")
 async def analyze_resume(
     resume_id: UUID,
