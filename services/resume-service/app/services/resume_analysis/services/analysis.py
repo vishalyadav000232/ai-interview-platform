@@ -25,7 +25,7 @@ from app.repository.interface.resume_project import (
 from app.repository.interface.resume_expriennc import (
     ResumeExprienceRepositoryInteraface,
 )
-
+from app.core.exceptions.exception import ResumeNotFound , ResumeAnalysisNotFound
 
 ANALYSIS_VERSION: Final[str] = "v4"
 
@@ -595,4 +595,24 @@ class ResumeAnalysisService:
         )
 
 
+    async def get_resume_analysis(
+    self,
+    resume_analysis_id: UUID,
+) -> ResumeAnalysis:
+        # resume = await self.resume_repo.get_by_id(
+        #     resume_id
+        # )
 
+        # if resume is None:
+        #     raise ResumeNotFound()
+
+        analysis = (
+            await self.analysis_repo.get_by_id(
+                resume_analysis_id
+            )
+        )
+
+        if analysis is None:
+            raise ResumeAnalysisNotFound()
+
+        return analysis

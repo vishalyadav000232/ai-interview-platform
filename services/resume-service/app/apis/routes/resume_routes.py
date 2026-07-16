@@ -204,4 +204,16 @@ async def analyze_resume(
 
 
 
+@router.get(
+    "/{resume_id}/analysis",
 
+)
+async def get_resume_analysis(
+    resume_id: UUID,
+    service: ResumeAnalysisServiceInterface = Depends(
+        get_resume_analysis_service
+    ),
+):
+    return await service.get_resume_analysis(
+        resume_id
+    )

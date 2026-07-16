@@ -13,10 +13,10 @@ class ResumeException(Exception):
         self.error_code = error_code
 
         super().__init__(message)
-        
-        
-        
-        
+
+
+
+
 
 class ResumeTextExtractionException(ResumeException):
     def __init__(self):
@@ -50,4 +50,19 @@ class ResumeParsedDataInvalidException(ResumeException):
             message="Failed to parse resume text",
             status_code=status.HTTP_404_NOT_FOUND,
             error_code="RESUME_PARSE_FAILED",
+        )
+
+class ResumeNotFound(ResumeException):
+    def __init__(self):
+        super().__init__(
+            message="Resume Not Found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            error_code="RESUME_NOT_FOUND",
+        )
+class ResumeAnalysisNotFound(ResumeException):
+    def __init__(self):
+        super().__init__(
+            message="Resume analysis not found",
+            status_code=status.HTTP_404_NOT_FOUND,
+            error_code="RESUME_ANALYSIS_NOT_FOUND",
         )
