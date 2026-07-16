@@ -593,3 +593,6 @@ class ResumeAnalysisService:
         return await self.analysis_repo.create(
             obj=analysis,
         )
+
+
+
