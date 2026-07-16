@@ -732,22 +732,22 @@ class ResumeAnalysisService:
         )
 
         try:
-            resume = await self.resume_repo.get_by_id(
-                resume_id
-            )
+            # resume = await self.resume_repo.get_by_id(
+            #     resume_id
+            # )
 
-            if resume is None:
-                logger.warning(
-                    (
-                        "Resume not found while fetching analysis. "
-                        "resume_id=%s"
-                    ),
-                    resume_id,
-                )
-                raise ResumeNotFound()
+            # if resume is None:
+            #     logger.warning(
+            #         (
+            #             "Resume not found while fetching analysis. "
+            #             "resume_id=%s"
+            #         ),
+            #         resume_id,
+            #     )
+            #     raise ResumeNotFound()
 
             analysis = (
-                await self.analysis_repo.get_latest_by_resume_id(
+                await self.analysis_repo.get_by_id(
                     resume_id
                 )
             )
