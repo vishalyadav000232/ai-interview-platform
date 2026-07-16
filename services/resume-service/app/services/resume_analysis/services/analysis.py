@@ -1,31 +1,41 @@
+import logging
 import time
 from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from functools import cached_property
-from typing import Final
+from typing import Final, Iterable
 from uuid import UUID
 
+from app.core.exceptions.exception import (
+    ResumeAnalysisNotFound,
+    ResumeNotFound,
+)
 from app.models.resume_analysis import ResumeAnalysis
-from app.repository.interface.resume import ResumeRepositoryInterface
+from app.repository.interface.resume import (
+    ResumeRepositoryInterface,
+)
 from app.repository.interface.resume_analysis import (
     ResumeAnalysisRepositoryInterface,
-)
-from app.repository.interface.resume_profile import (
-    ResumeProfileRepositoryInterface,
-)
-from app.repository.interface.resume_skill import (
-    ResumeSkillRepositoryInterface,
 )
 from app.repository.interface.resume_education import (
     ResumeEducationRepositoryInterface,
 )
-from app.repository.interface.resume_project import (
-    ResumeProjectRepositoryInterface,
-)
 from app.repository.interface.resume_expriennc import (
     ResumeExprienceRepositoryInteraface,
 )
-from app.core.exceptions.exception import ResumeNotFound , ResumeAnalysisNotFound
+from app.repository.interface.resume_profile import (
+    ResumeProfileRepositoryInterface,
+)
+from app.repository.interface.resume_project import (
+    ResumeProjectRepositoryInterface,
+)
+from app.repository.interface.resume_skill import (
+    ResumeSkillRepositoryInterface,
+)
+
+
+logger = logging.getLogger(__name__)
+
 
 ANALYSIS_VERSION: Final[str] = "v4"
 
@@ -53,22 +63,17 @@ REQUIRED_SKILLS: Final[frozenset[str]] = frozenset(
 SKILL_ALIASES: Final[dict[str, str]] = {
     "fast api": "fastapi",
     "fast-api": "fastapi",
-
     "postgres": "postgresql",
     "postgre sql": "postgresql",
     "postgres sql": "postgresql",
-
     "rest apis": "rest api",
     "rest-api": "rest api",
     "restful api": "rest api",
     "restful apis": "rest api",
-
     "git hub": "github",
-
     "json web token": "jwt",
     "json web tokens": "jwt",
     "jwt token": "jwt",
-
     "structured query language": "sql",
 }
 
@@ -162,7 +167,9 @@ def normalize_skill_name(value: str) -> str:
     )
 
 
-def extract_skill_name(skill: object) -> str | None:
+def extract_skill_name(
+    skill: object,
+) -> str | None:
     raw_skill_name = (
         getattr(skill, "name", None)
         or getattr(skill, "skill_name", None)
@@ -180,7 +187,9 @@ def extract_skill_name(skill: object) -> str | None:
     return normalized_skill or None
 
 
-def score_profile(profile: object | None) -> Decimal:
+def score_profile(
+    profile: object | None,
+) -> Decimal:
     if profile is None:
         return Decimal("0")
 
@@ -207,7 +216,7 @@ def score_profile(profile: object | None) -> Decimal:
 
 
 def score_skills(
-    skills,
+    skills: Iterable[object] | None,
 ) -> tuple[
     Decimal,
     tuple[str, ...],
@@ -260,7 +269,9 @@ def score_skills(
     )
 
 
-def score_education(education) -> Decimal:
+def score_education(
+    education: object | None,
+) -> Decimal:
     if education is None:
         return Decimal("0")
 
@@ -277,8 +288,11 @@ def score_education(education) -> Decimal:
     return W.EDUCATION
 
 
-def score_projects(projects) -> Decimal:
-    project_count = len(projects or [])
+def score_projects(
+    projects: Iterable[object] | None,
+) -> Decimal:
+    project_list = list(projects or [])
+    project_count = len(project_list)
 
     if project_count == 0:
         return Decimal("0")
@@ -295,19 +309,23 @@ def score_projects(projects) -> Decimal:
     return W.PROJECTS
 
 
-def score_experience(experiences) -> Decimal:
-    if experiences:
+def score_experience(
+    experiences: Iterable[object] | None,
+) -> Decimal:
+    experience_list = list(experiences or [])
+
+    if experience_list:
         return W.EXPERIENCE
 
     return FRESHER_BASELINE_SCORE
 
 
 def build_section_scores(
-    profile,
-    skills,
-    education,
-    projects,
-    experiences,
+    profile: object | None,
+    skills: Iterable[object] | None,
+    education: object | None,
+    projects: Iterable[object] | None,
+    experiences: Iterable[object] | None,
 ) -> SectionScores:
     (
         skills_score,
@@ -488,131 +506,279 @@ class ResumeAnalysisService:
     ) -> ResumeAnalysis:
         start_time = time.perf_counter()
 
-        resume = await self.resume_repo.get_by_id(
-            resume_id
+        logger.info(
+            "Starting resume analysis. resume_id=%s version=%s",
+            resume_id,
+            ANALYSIS_VERSION,
         )
 
-        if resume is None:
-            raise ValueError(
-                "Resume not found"
-            )
-
-        profile = (
-            await self.profile_repo.get_by_resume_id(
+        try:
+            resume = await self.resume_repo.get_by_id(
                 resume_id
             )
-        )
 
-        skills = (
-            await self.skill_repo.get_by_resume_id(
-                resume_id
-            )
-        )
+            if resume is None:
+                logger.warning(
+                    "Resume not found during analysis. resume_id=%s",
+                    resume_id,
+                )
+                raise ResumeNotFound()
 
-        education = (
-            await self.education_repo.get_by_resume_id(
-                resume_id
-            )
-        )
-
-        projects = (
-            await self.project_repo.get_by_resume_id(
-                resume_id
-            )
-        )
-
-        experiences = (
-            await self.experience_repo.get_by_resume_id(
-                resume_id
-            )
-        )
-
-        scores = build_section_scores(
-            profile=profile,
-            skills=skills,
-            education=education,
-            projects=projects,
-            experiences=experiences,
-        )
-
-        analysis_time_ms = int(
-            (
-                time.perf_counter()
-                - start_time
-            )
-            * 1000
-        )
-
-        analysis_data = {
-            "overall_score": scores.overall,
-            "profile_score": scores.profile,
-            "skills_score": scores.skills,
-            "education_score": scores.education,
-            "projects_score": scores.projects,
-            "experience_score": scores.experience,
-            "resume_completeness": scores.overall,
-            "keyword_match_percentage": (
-                scores.keyword_match_percentage
-            ),
-            "matched_skills": list(
-                scores.matched_skills
-            ),
-            "missing_skills": list(
-                scores.missing_skills
-            ),
-            "suggestions": generate_suggestions(
-                scores
-            ),
-            "strengths": generate_strengths(
-                scores
-            ),
-            "weaknesses": generate_weaknesses(
-                scores
-            ),
-            "analysis_version": ANALYSIS_VERSION,
-            "analysis_time_ms": analysis_time_ms,
-        }
-
-        existing_analysis = (
-            await self.analysis_repo.get_latest_by_resume_id(
-                resume_id
-            )
-        )
-
-        if existing_analysis is not None:
-            return await self.analysis_repo.update(
-                obj=existing_analysis,
-                data=analysis_data,
+            logger.debug(
+                "Fetching parsed resume sections. resume_id=%s",
+                resume_id,
             )
 
-        analysis = ResumeAnalysis(
-            resume_id=resume_id,
-            **analysis_data,
-        )
+            profile = (
+                await self.profile_repo.get_by_resume_id(
+                    resume_id
+                )
+            )
 
-        return await self.analysis_repo.create(
-            obj=analysis,
-        )
+            skills = (
+                await self.skill_repo.get_by_resume_id(
+                    resume_id
+                )
+            )
 
+            education = (
+                await self.education_repo.get_by_resume_id(
+                    resume_id
+                )
+            )
+
+            projects = (
+                await self.project_repo.get_by_resume_id(
+                    resume_id
+                )
+            )
+
+            experiences = (
+                await self.experience_repo.get_by_resume_id(
+                    resume_id
+                )
+            )
+
+            logger.debug(
+                (
+                    "Resume sections fetched. resume_id=%s "
+                    "profile_present=%s skills_count=%s "
+                    "education_present=%s projects_count=%s "
+                    "experience_count=%s"
+                ),
+                resume_id,
+                profile is not None,
+                len(skills or []),
+                bool(education),
+                len(projects or []),
+                len(experiences or []),
+            )
+
+            scores = build_section_scores(
+                profile=profile,
+                skills=skills,
+                education=education,
+                projects=projects,
+                experiences=experiences,
+            )
+
+            analysis_time_ms = int(
+                (
+                    time.perf_counter()
+                    - start_time
+                )
+                * 1000
+            )
+
+            logger.info(
+                (
+                    "Resume scores calculated. resume_id=%s "
+                    "overall_score=%s profile_score=%s "
+                    "skills_score=%s education_score=%s "
+                    "projects_score=%s experience_score=%s "
+                    "keyword_match=%s analysis_time_ms=%s"
+                ),
+                resume_id,
+                scores.overall,
+                scores.profile,
+                scores.skills,
+                scores.education,
+                scores.projects,
+                scores.experience,
+                scores.keyword_match_percentage,
+                analysis_time_ms,
+            )
+
+            analysis_data = {
+                "overall_score": scores.overall,
+                "profile_score": scores.profile,
+                "skills_score": scores.skills,
+                "education_score": scores.education,
+                "projects_score": scores.projects,
+                "experience_score": scores.experience,
+                "resume_completeness": scores.overall,
+                "keyword_match_percentage": (
+                    scores.keyword_match_percentage
+                ),
+                "matched_skills": list(
+                    scores.matched_skills
+                ),
+                "missing_skills": list(
+                    scores.missing_skills
+                ),
+                "suggestions": generate_suggestions(
+                    scores
+                ),
+                "strengths": generate_strengths(
+                    scores
+                ),
+                "weaknesses": generate_weaknesses(
+                    scores
+                ),
+                "analysis_version": ANALYSIS_VERSION,
+                "analysis_time_ms": analysis_time_ms,
+            }
+
+            existing_analysis = (
+                await self.analysis_repo.get_latest_by_resume_id(
+                    resume_id
+                )
+            )
+
+            if existing_analysis is not None:
+                logger.info(
+                    (
+                        "Updating existing resume analysis. "
+                        "resume_id=%s analysis_id=%s"
+                    ),
+                    resume_id,
+                    existing_analysis.id,
+                )
+
+                updated_analysis = (
+                    await self.analysis_repo.update(
+                        obj=existing_analysis,
+                        data=analysis_data,
+                    )
+                )
+
+                logger.info(
+                    (
+                        "Resume analysis updated successfully. "
+                        "resume_id=%s analysis_id=%s"
+                    ),
+                    resume_id,
+                    updated_analysis.id,
+                )
+
+                return updated_analysis
+
+            logger.info(
+                "Creating new resume analysis. resume_id=%s",
+                resume_id,
+            )
+
+            analysis = ResumeAnalysis(
+                resume_id=resume_id,
+                **analysis_data,
+            )
+
+            created_analysis = (
+                await self.analysis_repo.create(
+                    obj=analysis,
+                )
+            )
+
+            logger.info(
+                (
+                    "Resume analysis created successfully. "
+                    "resume_id=%s analysis_id=%s"
+                ),
+                resume_id,
+                created_analysis.id,
+            )
+
+            return created_analysis
+
+        except (ResumeNotFound, ResumeAnalysisNotFound):
+            raise
+
+        except Exception:
+            elapsed_time_ms = int(
+                (
+                    time.perf_counter()
+                    - start_time
+                )
+                * 1000
+            )
+
+            logger.exception(
+                (
+                    "Unexpected error while analyzing resume. "
+                    "resume_id=%s elapsed_time_ms=%s"
+                ),
+                resume_id,
+                elapsed_time_ms,
+            )
+            raise
 
     async def get_resume_analysis(
-    self,
-    resume_analysis_id: UUID,
-) -> ResumeAnalysis:
-        # resume = await self.resume_repo.get_by_id(
-        #     resume_id
-        # )
-
-        # if resume is None:
-        #     raise ResumeNotFound()
-
-        analysis = (
-            await self.analysis_repo.get_by_id(
-                resume_analysis_id
-            )
+        self,
+        resume_id: UUID,
+    ) -> ResumeAnalysis:
+        logger.info(
+            "Fetching resume analysis. resume_id=%s",
+            resume_id,
         )
 
-        if analysis is None:
-            raise ResumeAnalysisNotFound()
+        try:
+            resume = await self.resume_repo.get_by_id(
+                resume_id
+            )
 
-        return analysis
+            if resume is None:
+                logger.warning(
+                    (
+                        "Resume not found while fetching analysis. "
+                        "resume_id=%s"
+                    ),
+                    resume_id,
+                )
+                raise ResumeNotFound()
+
+            analysis = (
+                await self.analysis_repo.get_latest_by_resume_id(
+                    resume_id
+                )
+            )
+
+            if analysis is None:
+                logger.warning(
+                    "Resume analysis not found. resume_id=%s",
+                    resume_id,
+                )
+                raise ResumeAnalysisNotFound()
+
+            logger.info(
+                (
+                    "Resume analysis fetched successfully. "
+                    "resume_id=%s analysis_id=%s"
+                ),
+                resume_id,
+                analysis.id,
+            )
+
+            return analysis
+
+        except (ResumeNotFound, ResumeAnalysisNotFound):
+            raise
+
+        except Exception:
+            logger.exception(
+                (
+                    "Unexpected error while fetching resume analysis. "
+                    "resume_id=%s"
+                ),
+                resume_id,
+            )
+            raise
