@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 
 import StepCard from "../../../components/landing/StepCard";
-import { Connector } from "../../../components/landing/Conecter";
+import { Connector } from "../../../components/landing/Connector";
 
 
 const steps = [
@@ -49,7 +49,7 @@ const HowItWorks = () => {
         <div className="absolute -left-24 top-10 -z-0 h-[420px] w-[420px] rounded-full bg-violet-600/20 blur-[140px]" />
 
         <div className="absolute right-24 -top-10 -z-0 h-[420px] w-[420px] rounded-full bg-violet-600/20 blur-[140px]" />
-      
+
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-bold sm:text-4xl lg:text-5xl">
             How It{" "}
@@ -64,7 +64,7 @@ const HowItWorks = () => {
           </p>
         </div>
 
-      
+
         <div className="mt-16 flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between">
           {steps.map((step, index) => (
             <React.Fragment key={step.step}>

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { registerSchema, type RegisterFormData } from "../schemas/register/shemas";
+import { registerSchema, type RegisterFormData } from "../schemas/register/schema";
 import { email } from "zod";
 import type { RegisterPayload } from "../types/auth";
 import { useRegister } from "../hooks/useRegister";
