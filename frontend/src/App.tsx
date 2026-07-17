@@ -2,13 +2,12 @@ import "./App.css";
 
 import { useAuthBootstrap } from "./features/auth/hooks/useAuthBootstrap";
 
-import { AuthProvider } from "./providers/AuthProvider";
 import { QueryProvider } from "./providers/QueryProvider";
 import { ToastProvider } from "./providers/ToastProvider";
 
 import AppRoutes from "./routes/AppRoutes";
 
-function AppContent() {
+function AppBootstrap() {
   useAuthBootstrap();
 
   return (
@@ -22,9 +21,7 @@ function AppContent() {
 function App() {
   return (
     <QueryProvider>
-      <AuthProvider>
-        <AppContent />
-      </AuthProvider>
+      <AppBootstrap />
     </QueryProvider>
   );
 }
