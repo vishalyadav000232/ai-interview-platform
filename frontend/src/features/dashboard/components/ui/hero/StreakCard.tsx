@@ -19,7 +19,8 @@ export const StreakCard = () => {
   return (
     <section className="h-full rounded-xl border border-white/10 bg-[#0b0f17] p-6">
       <div className="flex items-center gap-2">
-        <h2 className="text-sm font-semibold text-white">
+
+        <h2 className="text-[12px] font-semibold text-white">
           Your Preparation Streak
         </h2>
 
@@ -27,9 +28,10 @@ export const StreakCard = () => {
           className="h-4 w-4 text-orange-400"
           aria-hidden="true"
         />
+
       </div>
 
-      <div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-center">
+      <div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-center ">
         <div
           className="flex h-32 w-32 shrink-0 items-center justify-center self-center rounded-full sm:self-auto"
           style={{
@@ -52,7 +54,7 @@ export const StreakCard = () => {
 
         <div className="min-w-0 flex-1">
           <p className="text-sm text-slate-300">
-            Keep it up! You&apos;re doing great.
+            Keep it up! You &apos;re doing great.
           </p>
 
           <div className="mt-4 grid grid-cols-7 gap-2">
