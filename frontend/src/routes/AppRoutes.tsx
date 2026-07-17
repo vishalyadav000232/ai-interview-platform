@@ -4,12 +4,12 @@ import {
   RouterProvider,
 } from "react-router-dom";
 
-import LandingPage from "../pages/Landing/LandingPage";
+import { AppLayout } from "../components/layout/AppLayout";
 
+import LandingPage from "../pages/Landing/LandingPage";
 import { LoginPage } from "../features/auth/page/Login/LoginPage";
 import { RegisterPage } from "../features/auth/page/Register/RegisterPage";
-
-import { DashboarPages } from "../features/dashboard/pages/DashboardPage";
+import { DashboardPage } from "../features/dashboard/pages/DashboardPage";
 
 import { ProtectedRoute } from "./ProtectedRoute";
 
@@ -18,27 +18,28 @@ const router = createBrowserRouter([
     path: "/",
     element: <LandingPage />,
   },
-
   {
     path: "/login",
     element: <LoginPage />,
   },
-
   {
     path: "/register",
     element: <RegisterPage />,
   },
-
   {
     element: <ProtectedRoute />,
     children: [
       {
-        path: "/dashboard",
-        element: <DashboarPages />,
+        element: <AppLayout />,
+        children: [
+          {
+            path: "/dashboard",
+            element: <DashboardPage />,
+          },
+        ],
       },
     ],
   },
-
   {
     path: "*",
     element: <Navigate to="/" replace />,
