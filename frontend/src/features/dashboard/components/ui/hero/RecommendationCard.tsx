@@ -2,7 +2,7 @@ import { ArrowRight, Clock3, Rocket, Sparkles } from "lucide-react";
 
 export const RecommendationCard = () => {
   return (
-    <div className="flex h-full items-center justify-between gap-8 rounded-3xl border border-white/10 bg-[#0b0f17] p-4">
+    <div className="flex h-full items-center justify-between gap-5 rounded-xl border border-white/10 bg-[#0b0f17] p-2">
 
       <div className="flex items-center gap-6">
         <div className="flex h-28 w-28 items-center justify-center rounded-full bg-violet-600/1">
