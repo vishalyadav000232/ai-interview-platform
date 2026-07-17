@@ -1,25 +1,32 @@
+import "./App.css";
 
-import './App.css'
-import { useAuthBootstrap } from './features/auth/hooks/useAuthBootstrap'
-import { AuthProvider } from './providers/AuthProvider'
-import { QueryProvider } from './providers/QueryProvider'
-import { ToastProvider } from './providers/ToastProvider'
-import AppRoutes from './routes/AppRoutes'
+import { useAuthBootstrap } from "./features/auth/hooks/useAuthBootstrap";
 
-function App() {
+import { AuthProvider } from "./providers/AuthProvider";
+import { QueryProvider } from "./providers/QueryProvider";
+import { ToastProvider } from "./providers/ToastProvider";
+
+import AppRoutes from "./routes/AppRoutes";
+
+function AppContent() {
   useAuthBootstrap();
 
-  return(
-
-    <QueryProvider>
-      <AuthProvider>
-      <ToastProvider/>
+  return (
+    <>
+      <ToastProvider />
       <AppRoutes />
-
-      </AuthProvider>
-
-    </QueryProvider>
-  )
+    </>
+  );
 }
 
-export default App
+function App() {
+  return (
+    <QueryProvider>
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    </QueryProvider>
+  );
+}
+
+export default App;
