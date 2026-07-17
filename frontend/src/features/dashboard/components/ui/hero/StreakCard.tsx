@@ -6,17 +6,19 @@ const weekDays = [
   { label: "W", completed: true },
   { label: "T", completed: true },
   { label: "F", completed: true },
-  { label: "S", completed: true },
+  { label: "S", completed: false },
   { label: "S", completed: false },
 ];
 
 export const StreakCard = () => {
-  const streakDays = 7;
-  const progress = 78;
+  const streakDays = 5;
+  const longestStreak = 12;
+
+  const progress = Math.min((streakDays / 7) * 100, 100);
 
   return (
-    <div className="h-full  rounded-xl border border-white/10 bg-[#0b0f17] p-6">
-      <div className="flex items-center gap-1 ">
+    <section className="h-full rounded-xl border border-white/10 bg-[#0b0f17] p-6">
+      <div className="flex items-center gap-2">
         <h2 className="text-sm font-semibold text-white">
           Your Preparation Streak
         </h2>
@@ -27,9 +29,9 @@ export const StreakCard = () => {
         />
       </div>
 
-      <div className="mt-5 flex items-center gap-6">
+      <div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-center">
         <div
-          className="relative flex h-32 w-32 shrink-0 items-center justify-center rounded-full"
+          className="flex h-32 w-32 shrink-0 items-center justify-center self-center rounded-full sm:self-auto"
           style={{
             background: `conic-gradient(
               rgb(139 92 246) ${progress}%,
@@ -53,7 +55,7 @@ export const StreakCard = () => {
             Keep it up! You&apos;re doing great.
           </p>
 
-          <div className="mt-4 flex items-start justify-between gap-2">
+          <div className="mt-4 grid grid-cols-7 gap-2">
             {weekDays.map((day, index) => (
               <div
                 key={`${day.label}-${index}`}
@@ -61,10 +63,10 @@ export const StreakCard = () => {
               >
                 <div
                   className={[
-                    "flex h-6 w-6 items-center justify-center rounded-full",
+                    "flex h-7 w-7 items-center justify-center rounded-full border",
                     day.completed
-                      ? "bg-violet-600 text-white"
-                      : "bg-slate-800 text-slate-500",
+                      ? "border-violet-700 bg-violet-700 text-white"
+                      : "border-white/10 bg-slate-800 text-slate-500",
                   ].join(" ")}
                 >
                   {day.completed && (
@@ -85,12 +87,12 @@ export const StreakCard = () => {
 
           <p className="mt-4 text-xs text-slate-500">
             Longest Streak:{" "}
-            <span className="text-slate-300">
-              12 days
+            <span className="font-medium text-slate-300">
+              {longestStreak} days
             </span>
           </p>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
