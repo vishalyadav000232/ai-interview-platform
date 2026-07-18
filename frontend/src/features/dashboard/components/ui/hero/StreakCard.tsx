@@ -5,13 +5,13 @@ const weekDays = [
   { label: "T", completed: true },
   { label: "W", completed: true },
   { label: "T", completed: true },
-  { label: "F", completed: true },
+  { label: "F", completed: false },
   { label: "S", completed: false },
   { label: "S", completed: false },
 ];
 
 export const StreakCard = () => {
-  const streakDays = 5;
+  const streakDays = 1;
   const longestStreak = 12;
 
   const progress = Math.min((streakDays / 7) * 100, 100);
