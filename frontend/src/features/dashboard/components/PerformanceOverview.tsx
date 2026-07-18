@@ -10,6 +10,7 @@ import {
 } from "recharts";
 
 import { TabButton } from "./ui/performence/TabButton";
+import { ChevronDown } from "lucide-react";
 
 const performanceData = [
   { day: "May 12", score: 62 },
@@ -41,9 +42,10 @@ export const PerformanceOverview = () => {
 
         <button
           type="button"
-          className="text-xs text-slate-300 transition hover:text-white"
+          className="text-xs text-slate-300 transition hover:text-white inline-flex items-center justify-center gap-1.5"
         >
           This Week
+          <ChevronDown  size={18}/>
         </button>
       </div>
 
@@ -59,7 +61,7 @@ export const PerformanceOverview = () => {
       </div>
 
       {/* Chart */}
-      <div className="h-[120px] w-full">
+      <div className="h-[200px] w-full">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart
             data={performanceData}
