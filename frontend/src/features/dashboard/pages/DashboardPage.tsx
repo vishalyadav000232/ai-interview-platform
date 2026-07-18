@@ -10,26 +10,35 @@ import { TodayGoal } from "../components/TodayGoal";
 
 export function DashboardPage() {
   return (
-    <>
+    <div className="space-y-2">
       <HeroSection />
 
       <StatsGrid />
 
-      <section className="grid xl:grid-cols-12 gap-6">
-        <ResumeAnalysis />
-        <AIRecommendation />
-        <PerformanceOverview />
+
+      <section className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div className="xl:col-span-5">
+          <ResumeAnalysis />
+        </div>
+
+        <div className="xl:col-span-7 space-y-6 bg-amber-300">
+          <AIRecommendation />
+          <PerformanceOverview />
+        </div>
       </section>
 
-      <section className="grid xl:grid-cols-12 gap-6">
-        <RecentInterviews />
-        <SkillsProgress />
+      {/* Row 2 */}
+      <section className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+        <div className="xl:col-span-8">
+          <RecentInterviews />
+        </div>
 
-        <div className="space-y-6">
+        <div className="xl:col-span-4 space-y-6">
+          <SkillsProgress />
           <MissingSkills />
           <TodayGoal />
         </div>
       </section>
-    </>
+    </div>
   );
 }

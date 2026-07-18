@@ -22,44 +22,42 @@ export const StatCard = ({
     highlight,
 }: StatCardProps) => {
     return (
-        <div className="rounded-2xl border border-white/10 bg-[#0b0f17] p-6">
-            <div className="flex items-start justify-between">
-                <div
-                    className="flex h-12 w-12 items-center justify-center rounded-xl"
-                    style={{ backgroundColor: iconBackground }}
-                >
-                    <Icon
-                        className="h-6 w-6"
-                        style={{ color: iconColor }}
-                        strokeWidth={2}
-                    />
-                </div>
+        <div className="flex items-center gap-4 rounded-xl border border-white/10 bg-[#0b0f17] p-4">
+       
+            <div
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+                style={{ backgroundColor: iconBackground }}
+            >
+                <Icon
+                    className="h-5 w-5"
+                    style={{ color: iconColor }}
+                    strokeWidth={2}
+                />
             </div>
 
-            <div className="mt-5">
-                <p className="text-sm text-slate-400">
+            <div className="flex-1">
+                <p className="text-[11px] font-medium text-slate-400">
                     {title}
                 </p>
 
-                <div className="mt-2 flex items-end gap-1">
-                    <span className="text-4xl font-semibold text-white">
+                <div className="mt-1 flex items-end gap-1">
+                    <span className="text-xl font-bold leading-none text-white">
                         {value}
                     </span>
 
                     {suffix && (
-                        <span className="pb-1 text-lg text-slate-400">
+                        <span className="text-base leading-none text-slate-400">
                             {suffix}
                         </span>
                     )}
                 </div>
 
-                <p className="mt-3 text-sm text-slate-400">
+                <p className="mt-2 text-xs leading-5 text-slate-400">
                     {highlight && (
-                        <span className="font-medium text-green-400">
+                        <span className="mr-1 font-semibold text-green-400">
                             {highlight}
                         </span>
                     )}
-
                     {description}
                 </p>
             </div>

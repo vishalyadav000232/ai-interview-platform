@@ -1,26 +1,57 @@
+import {
+  FileText,
+  Flame,
+  Video,
+  ChartColumn,
+} from "lucide-react";
+import { StatCard } from "./ui/stats/StatCard";
+
+
 
 export const StatsGrid = () => {
   return (
-    <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-      {/* Stat Card 1 */}
-      <div className="rounded-xl border border-white/10 bg-[#0b0f17] p-5">
-        Resume Score
-      </div>
+    <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+      <StatCard
+        icon={FileText}
+        iconBackground="#0f2e22"
+        iconColor="#22c55e"
+        title="Resume Score"
+        value="78"
+        suffix="/100"
+        highlight="+8 "
+        description="points from last analysis"
+      />
 
-      {/* Stat Card 2 */}
-      <div className="rounded-xl border border-white/10 bg-[#0b0f17] p-5">
-        Interviews
-      </div>
+      <StatCard
+        icon={ChartColumn}
+        iconBackground="#2b1946"
+        iconColor="#a855f7"
+        title="Overall Interview Score"
+        value="82"
+        suffix="%"
+        highlight="+12% "
+        description="from last 7 days"
+      />
 
-      {/* Stat Card 3 */}
-      <div className="rounded-xl border border-white/10 bg-[#0b0f17] p-5">
-        Success Rate
-      </div>
+      <StatCard
+        icon={Video}
+        iconBackground="#102847"
+        iconColor="#3b82f6"
+        title="Mock Interviews"
+        value="12"
+        description="Total Completed"
+      />
 
-      {/* Stat Card 4 */}
-      <div className="rounded-xl border border-white/10 bg-[#0b0f17] p-5">
-        Practice Time
-      </div>
+      <StatCard
+        icon={Flame}
+        iconBackground="#3a2212"
+        iconColor="#fb923c"
+        title="Current Streak"
+        value="7"
+        suffix="Days"
+        highlight="Keep it alive! "
+        description=""
+      />
     </section>
   );
 };
