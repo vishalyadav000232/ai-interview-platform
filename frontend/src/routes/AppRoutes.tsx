@@ -12,6 +12,7 @@ import { RegisterPage } from "../features/auth/page/Register/RegisterPage";
 import { DashboardPage } from "../features/dashboard/pages/DashboardPage";
 
 import { ProtectedRoute } from "./ProtectedRoute";
+import { ResumePage } from "../features/resume/pages/ResumePage";
 
 const router = createBrowserRouter([
   {
@@ -36,6 +37,10 @@ const router = createBrowserRouter([
             path: "/dashboard",
             element: <DashboardPage />,
           },
+          {
+            path: "resume",
+            element: <ResumePage />,
+          }
         ],
       },
     ],
