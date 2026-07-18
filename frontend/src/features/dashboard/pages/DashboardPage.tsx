@@ -10,12 +10,12 @@ import { TodayGoal } from "../components/TodayGoal";
 
 export function DashboardPage() {
   return (
-    <div className="mx-auto w-full max-w-[1600px] space-y-6">
+    <div className="mx-auto w-full max-w-[1600px] space-y-2">
       <HeroSection />
 
       <StatsGrid />
 
-      <section className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-12">
+      <section className="grid grid-cols-1 items-stretch gap-2 xl:grid-cols-12">
         <div className="min-w-0 xl:col-span-4">
           <ResumeAnalysis />
         </div>

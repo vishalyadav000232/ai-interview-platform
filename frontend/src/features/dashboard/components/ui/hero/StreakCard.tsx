@@ -14,13 +14,24 @@ export const StreakCard = () => {
   const streakDays = 1;
   const longestStreak = 12;
 
-  const progress = Math.min((streakDays / 7) * 100, 100);
+  const radius = 46;
+
+  const circumference = 2 * Math.PI * radius;
+
+  const progressPercentage = Math.min(
+    (streakDays / 7) * 100,
+    100
+  );
+
+  const strokeOffset =
+    circumference -
+    (progressPercentage / 100) * circumference;
 
   return (
-    <section className="h-full rounded-xl border border-white/10 bg-[#0b0f17] p-6">
-      <div className="flex items-center gap-2">
+    <section className="h-full rounded-xl border border-white/10 bg-[#0b0f17] p-5">
 
-        <h2 className="text-[12px] font-semibold text-white">
+      <div className="flex items-center gap-2">
+        <h2 className="text-[11px] font-semibold text-white">
           Your Preparation Streak
         </h2>
 
@@ -28,34 +39,61 @@ export const StreakCard = () => {
           className="h-4 w-4 text-orange-400"
           aria-hidden="true"
         />
-
       </div>
 
-      <div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-center ">
-        <div
-          className="flex h-32 w-32 shrink-0 items-center justify-center self-center rounded-full sm:self-auto"
-          style={{
-            background: `conic-gradient(
-              rgb(139 92 246) ${progress}%,
-              rgb(39 35 67) ${progress}% 100%
-            )`,
-          }}
-        >
-          <div className="flex h-[106px] w-[106px] flex-col items-center justify-center rounded-full bg-[#0b0f17]">
-            <span className="text-3xl font-semibold text-white">
+
+      <div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-center">
+
+        <div className="relative h-28 w-28 shrink-0 self-center sm:self-auto">
+          <svg
+            className="-rotate-90"
+            width="112"
+            height="112"
+            viewBox="0 0 112 112"
+          >
+
+            <circle
+              cx="56"
+              cy="56"
+              r={radius}
+              fill="none"
+              stroke="rgba(255,255,255,0.08)"
+              strokeWidth="8"
+            />
+
+
+            <circle
+              cx="56"
+              cy="56"
+              r={radius}
+              fill="none"
+              stroke="#8b5cf6"
+              strokeWidth="8"
+              strokeLinecap="round"
+              strokeDasharray={circumference}
+              strokeDashoffset={strokeOffset}
+              className="transition-all duration-700"
+            />
+          </svg>
+
+
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-2xl font-semibold leading-none text-white">
               {streakDays}
             </span>
 
-            <span className="mt-1 text-xs text-slate-400">
+            <span className="mt-1 text-[11px] text-slate-400">
               Days
             </span>
           </div>
         </div>
 
+
         <div className="min-w-0 flex-1">
-          <p className="text-sm text-slate-300">
-            Keep it up! You &apos;re doing great.
+          <p className="text-[11px] text-slate-300">
+            Keep it up! You&apos;re doing great.
           </p>
+
 
           <div className="mt-4 grid grid-cols-7 gap-2">
             {weekDays.map((day, index) => (
@@ -65,29 +103,30 @@ export const StreakCard = () => {
               >
                 <div
                   className={[
-                    "flex h-7 w-7 items-center justify-center rounded-full border",
+                    "flex h-5 w-5 items-center justify-center rounded-full border",
                     day.completed
-                      ? "border-violet-700 bg-violet-700 text-white"
+                      ? "border-violet-600 bg-violet-600 text-white"
                       : "border-white/10 bg-slate-800 text-slate-500",
                   ].join(" ")}
                 >
                   {day.completed && (
                     <Check
-                      className="h-3.5 w-3.5"
+                      className="h-3 w-3"
                       strokeWidth={2.5}
                       aria-hidden="true"
                     />
                   )}
                 </div>
 
-                <span className="text-[11px] text-slate-500">
+                <span className="text-[10px] text-slate-500">
                   {day.label}
                 </span>
               </div>
             ))}
           </div>
 
-          <p className="mt-4 text-xs text-slate-500">
+          
+          <p className="mt-4 text-[11px] text-slate-500">
             Longest Streak:{" "}
             <span className="font-medium text-slate-300">
               {longestStreak} days

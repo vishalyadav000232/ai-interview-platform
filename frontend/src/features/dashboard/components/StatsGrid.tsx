@@ -10,7 +10,7 @@ import { StatCard } from "./ui/stats/StatCard";
 
 export const StatsGrid = () => {
   return (
-    <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+    <section className="grid gap-2 md:grid-cols-2 xl:grid-cols-4">
       <StatCard
         icon={FileText}
         iconBackground="#0f2e22"
