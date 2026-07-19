@@ -1,38 +1,37 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.repositories.resume import ResumeRepository
-from app.repositories.resume_profile import ResumeProfileRepository
-from app.repositories.resume_skill import ResumeSkillRepository
-from app.repositories.resume_education import ResumeEducationRepository
-from app.repositories.resume_experience import ResumeExperienceRepository
-from app.repositories.resume_project import ResumeProjectRepository
-from app.repositories.resume_analysis import ResumeAnalysisRepository
+from app.repository.resume import ResumeRepository
+from app.repository.resume_profile import ResumeProfileRepository
+from app.repository.resume_skills import ResumeSkillRepository
+from app.repository.resume_education import ResumeEducationRepository
+from app.repository.resume_exprience import   ResumeExprienceRepository
+from app.repository.resume_project import ResumeProjectRepository
+from app.repository.resume_analysis import ResumeAnalysisRepository
 
 from app.services.resume_processing import ResumeProcessingService
 from app.services.resume_parser import ResumeParsingService
-from app.services.resume_analysis import ResumeAnalysisService
+from app.services.resume_analysis.services.analysis import ResumeAnalysisService
 
-from app.services.pdf_extractor import PDFTextExtractor
-from app.services.resume_text_parser import ResumeParser
+from app.services.parser.extractor.pdf_text_extractor import PDFTextExtractor
+from app.services.parser.parsers.regex_resume_pareser import RegexResumeParser
 
 
 def build_resume_processing_service(
     db: AsyncSession,
 ) -> ResumeProcessingService:
-    # Repositories
+
     resume_repo = ResumeRepository(db)
     profile_repo = ResumeProfileRepository(db)
     skill_repo = ResumeSkillRepository(db)
     education_repo = ResumeEducationRepository(db)
-    experience_repo = ResumeExperienceRepository(db)
+    experience_repo = ResumeExprienceRepository(db)
     project_repo = ResumeProjectRepository(db)
     analysis_repo = ResumeAnalysisRepository(db)
 
-    # Stateless helper services
-    text_extractor = PDFTextExtractor()
-    resume_parser = ResumeParser()
 
-    # Parsing service
+    text_extractor = PDFTextExtractor()
+    resume_parser = RegexResumeParser()
+
     parsing_service = ResumeParsingService(
         resume_repo=resume_repo,
         text_extractor=text_extractor,
@@ -44,7 +43,6 @@ def build_resume_processing_service(
         exp_repo=experience_repo,
     )
 
-    # Analysis service
     analysis_service = ResumeAnalysisService(
         resume_repo=resume_repo,
         profile_repo=profile_repo,
