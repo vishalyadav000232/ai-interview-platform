@@ -2,16 +2,18 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-
-from app.core.logging import setup_logging
-from app.core.redis import create_redis_client
-from app.core.config import settings
-from app.database.session import AsyncLoaclSession , engine
-from app.apis.route import router as main_router
 from sqlalchemy import text
 
+from app.apis.route import router as main_router
+from app.core.config import settings
 from app.core.exceptions.exception_builder import register_exception_handlers
+from app.core.logging import setup_logging
+from app.core.redis import (
+    close_redis_client,
+    init_redis_client,
+)
+from app.database.session import AsyncLoaclSession, engine
+
 
 setup_logging()
 
@@ -22,39 +24,42 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     logger.info("Starting Resume Service")
 
-    redis = None
-
     try:
-        redis = await create_redis_client()
+
+        redis = await init_redis_client()
+
+
         await redis.ping()
+
 
         app.state.redis = redis
 
         logger.info("Redis connected successfully")
-        
+
+
         async with AsyncLoaclSession() as session:
             await session.execute(text("SELECT 1"))
-            
-        logger.info("Database connected Successfullu ")
-        
-        
+
+        logger.info("Database connected successfully")
         logger.info("Resume Service started successfully")
 
-    except Exception as e:
-        logger.exception(f"Resume Service startup failed: {e}")
+        
+        yield
+
+    except Exception:
+        logger.exception("Resume Service lifecycle failed")
         raise
 
-    yield
+    finally:
+        logger.info("Shutting down Resume Service")
 
-    logger.info("Shutting down Resume Service")
-
-    if redis:
-        await redis.aclose()
+        await close_redis_client()
         logger.info("Redis connection closed")
-        
-    engine.dispose()
-    
-    logger.info("Database connection dispose successfully ")
+
+        await engine.dispose()
+        logger.info("Database connection disposed successfully")
+
+        logger.info("Resume Service shutdown completed")
 
 
 app = FastAPI(
@@ -79,11 +84,9 @@ async def health():
         "success": True,
         "service": settings.APP_NAME,
         "status": "healthy",
-    
     }
-    
+
+
 app.include_router(main_router)
 
 register_exception_handlers(app=app)
-
-

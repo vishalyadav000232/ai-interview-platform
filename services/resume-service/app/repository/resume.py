@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.resume import Resume, ResumeStatus
 from app.repository.base import BaseRepository
 from app.repository.interface.resume import ResumeRepositoryInterface
-
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -220,3 +220,20 @@ class ResumeRepository(
             )
 
             raise
+
+
+    async def get_stale_processing_resumes(
+    self,
+    before: datetime,
+) -> list[Resume]:
+        stmt = (
+            select(Resume)
+            .where(
+                Resume.status == ResumeStatus.PROCESSING,
+                Resume.processing_started_at < before,
+            )
+        )
+
+        result = await self.session.execute(stmt)
+
+        return list(result.scalars().all())

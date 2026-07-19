@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
-
+from datetime import datetime
 from app.models.resume import Resume, ResumeStatus
 from app.repository.interface.base import BaseRepositoryInterface
 
@@ -44,3 +44,11 @@ class ResumeRepositoryInterface(
     @abstractmethod
     async def soft_delete(self, resume_id: UUID) -> bool:
         pass
+
+    @abstractmethod
+    async def get_stale_processing_resumes(
+        self,
+        before: datetime,
+    ) -> list[Resume]:
+        """Return resumes that are still processing before the given time."""
+        ...
