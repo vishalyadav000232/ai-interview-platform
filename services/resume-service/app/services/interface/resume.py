@@ -37,3 +37,9 @@ class ResumeServiceInterface(ABC):
         resume_id: UUID,
     ) -> bool:
         pass
+    @abstractmethod
+    async def mark_resume_queued(
+        self,
+        resume_id: UUID,
+    ):
+        raise NotImplementedError

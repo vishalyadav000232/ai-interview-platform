@@ -41,26 +41,14 @@ async def upload_resume(
         file_path=Path(resume.file_url),
     )
 
-    return {
-        "success": True,
-        "message": "Resume uploaded successfully",
-        "data": resume,
-    }
-
-@router.get(
-    "/user/{user_id}",
-    response_model=ResumeListResponse,
-)
-async def get_user_resumes(
-    user_id: UUID,
-    resume_service: ResumeServiceInterface = Depends(get_resume_service),
-):
-    resumes = await resume_service.get_user_resumes(user_id)
+    queued_resume = await resume_service.mark_resume_queued(
+        resume_id=resume.id,
+    )
 
     return {
         "success": True,
-        "message": "Resumes fetched successfully",
-        "data": resumes,
+        "message": "Resume uploaded and queued successfully",
+        "data": queued_resume,
     }
 
 

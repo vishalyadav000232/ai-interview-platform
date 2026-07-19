@@ -27,7 +27,7 @@ class ResumeService(ResumeServiceInterface):
         self.resume_repo = resume_repo
         self.upload_dir = Path("uploads/resumes")
         self.upload_dir.mkdir(parents=True, exist_ok=True)
-        
+
         self.profile_repo = profile_repo
         self.skill_repo = skill_repo
         self.education_repo = education_repo
@@ -105,7 +105,7 @@ class ResumeService(ResumeServiceInterface):
             )
 
             raise
-    
+
     async def get_resume(
     self,
     user_id: UUID,
@@ -146,3 +146,15 @@ class ResumeService(ResumeServiceInterface):
             return False
 
         return await self.resume_repo.soft_delete(resume_id)
+
+
+    async def mark_resume_queued(
+    self,
+    resume_id: UUID,
+):
+        resume = await self.resume_repo.mark_queued(resume_id)
+
+        if resume is None:
+            raise ValueError("Resume not found")
+
+        return resume
