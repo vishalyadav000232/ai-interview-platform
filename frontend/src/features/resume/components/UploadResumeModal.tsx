@@ -6,6 +6,7 @@ type UploadResumeModalProps = {
     open: boolean;
     onClose: () => void;
     onUpload: (file: File) => void;
+    isUploading : boolean
 };
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
@@ -21,6 +22,7 @@ export const UploadResumeModal = ({
     open,
     onClose,
     onUpload,
+    isUploading
 }: UploadResumeModalProps) => {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [errorMessage, setErrorMessage] = useState("");
@@ -63,6 +65,9 @@ export const UploadResumeModal = ({
     };
 
     const handleClose = () => {
+        if(isUploading){
+            return
+        }
         setSelectedFile(null);
         setErrorMessage("");
         onClose();
@@ -107,8 +112,8 @@ export const UploadResumeModal = ({
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-white"
-                        aria-label="Close upload modal"
+                        disabled={isUploading}
+                        className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition-colors hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                     >
                         <X className="h-5 w-5" />
                     </button>
@@ -199,7 +204,8 @@ export const UploadResumeModal = ({
                     <button
                         type="button"
                         onClick={handleClose}
-                        className="rounded-xl border border-white/10 px-5 py-2.5 text-sm font-semibold text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
+                        disabled={isUploading}
+                        className="rounded-xl border border-white/10 px-5 py-2.5 text-sm font-semibold text-slate-300 transition-colors hover:bg-white/5 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
                     >
                         Cancel
                     </button>
@@ -207,11 +213,20 @@ export const UploadResumeModal = ({
                     <button
                         type="button"
                         onClick={handleUpload}
-                        disabled={!selectedFile}
+                        disabled={!selectedFile || isUploading}
                         className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-violet-600/30 disabled:text-white/40"
                     >
-                        <UploadCloud className="h-4 w-4" />
-                        Upload & Analyze
+                        {isUploading ? (
+                            <>
+                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                Uploading...
+                            </>
+                        ) : (
+                            <>
+                                <UploadCloud className="h-4 w-4" />
+                                Upload & Analyze
+                            </>
+                        )}
                     </button>
                 </footer>
             </div>

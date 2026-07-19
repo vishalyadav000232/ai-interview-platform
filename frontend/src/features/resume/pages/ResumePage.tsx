@@ -1,14 +1,36 @@
 import { useState } from "react";
 import { EmptyResumeState } from "../components/EmptyResumeState";
 import { UploadResumeModal } from "../components/UploadResumeModal";
+import { useUploadResume } from "../hooks/useUpload";
 
 export const ResumePage = () => {
     const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
 
+    const uploadResumeMutation = useUploadResume()
+
     const handleResumeUpload = (file: File) => {
         console.log("Selected resume:", file);
 
-        setIsUploadModalOpen(false);
+
+        uploadResumeMutation.mutate(file  ,
+            {
+                onSuccess: (response)=> {
+                    console.log("Resume uploaded successfully:", response);
+
+                    console.log("Full Response:", response);
+                    console.log("Response Data:", response.data);
+                    console.log("Resume ID:", response.data.id);
+                    console.log("Status:", response.data.status);
+                    setIsUploadModalOpen(false);
+                },
+
+                 onError: (error) => {
+                    console.error("Resume upload failed:", error);
+                },
+            }
+        )
+
+
     };
 
     return (
@@ -36,6 +58,7 @@ export const ResumePage = () => {
                 open={isUploadModalOpen}
                 onClose={() => setIsUploadModalOpen(false)}
                 onUpload={handleResumeUpload}
+                isUploading= {uploadResumeMutation.isPending}
             />
         </main>
     );
