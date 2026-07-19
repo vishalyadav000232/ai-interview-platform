@@ -4,13 +4,10 @@ from uuid import UUID
 
 from app.core.exceptions.exception import (
     EmptyResumeTextException,
-    ResumeException,
     ResumeParsedDataInvalidException,
     ResumeParsingException,
     ResumeTextExtractionException,
 )
-
-from app.models.resume import ResumeStatus
 from app.models.resume_profile import ResumeProfile
 from app.models.resume_project import ResumeProject
 from app.models.resume_education import ResumeEducation
@@ -55,10 +52,10 @@ class ResumeParsingService:
         self.exp_repo = exp_repo
 
     async def process_resume(
-        self,
-        resume_id: UUID,
-        file_path: Path,
-    ) -> None:
+    self,
+    resume_id: UUID,
+    file_path: Path,
+) -> None:
         logger.info(
             "Starting background resume parsing",
             extra={
@@ -67,63 +64,26 @@ class ResumeParsingService:
             },
         )
 
-        try:
-            await self.resume_repo.update_status(
-                resume_id=resume_id,
-                status=ResumeStatus.PROCESSING,
-            )
+        text = await self._extract_text(file_path)
 
-            text = await self._extract_text(file_path)
-            parsed_data = await self._parse_text(text)
+        parsed_data = await self._parse_text(text)
 
-            await self._save_parsed_data(
-                resume_id=resume_id,
-                parsed_data=parsed_data,
-                parsed_text=text,
-            )
+        await self._save_parsed_data(
+            resume_id=resume_id,
+            parsed_data=parsed_data,
+            parsed_text=text,
+        )
 
-            logger.info(
-                "Background resume parsing completed",
-                extra={
-                    "resume_id": str(resume_id),
-                    "skills_count": len(parsed_data.get("skills", [])),
-                    "education_count": len(parsed_data.get("educations", [])),
-                    "project_count": len(parsed_data.get("projects", [])),
-                    "experience_count": len(parsed_data.get("experiences", [])),
-                },
-            )
-
-        except ResumeException as exc:
-            logger.warning(
-                "Resume parsing failed",
-                extra={
-                    "resume_id": str(resume_id),
-                    "file_path": str(file_path),
-                    "error_code": exc.error_code,
-                    "error": exc.message,
-                },
-            )
-
-            await self.resume_repo.update_status(
-                resume_id=resume_id,
-                status=ResumeStatus.FAILED,
-                failure_reason=exc.message,
-            )
-
-        except Exception:
-            logger.exception(
-                "Unexpected resume parsing error",
-                extra={
-                    "resume_id": str(resume_id),
-                    "file_path": str(file_path),
-                },
-            )
-
-            await self.resume_repo.update_status(
-                resume_id=resume_id,
-                status=ResumeStatus.FAILED,
-                failure_reason="Unexpected resume parsing error",
-            )
+        logger.info(
+            "Background resume parsing completed",
+            extra={
+                "resume_id": str(resume_id),
+                "skills_count": len(parsed_data.get("skills", [])),
+                "education_count": len(parsed_data.get("educations", [])),
+                "project_count": len(parsed_data.get("projects", [])),
+                "experience_count": len(parsed_data.get("experiences", [])),
+            },
+        )
 
     async def _extract_text(self, file_path: Path) -> str:
         try:
@@ -181,11 +141,7 @@ class ResumeParsingService:
                 commit=False,
             )
 
-            await self.resume_repo.update_status(
-                resume_id=resume_id,
-                status=ResumeStatus.ANALYZED,
-                commit=False,
-            )
+
 
             await self.resume_repo.commit()
 
@@ -282,7 +238,7 @@ class ResumeParsingService:
                 location=exp.get("location"),
                 start_date=exp.get("start_date"),
                 end_date=exp.get("end_date"),
-               
+
                 description=exp.get("description"),
             )
             for exp in parsed_data.get("experiences", [])

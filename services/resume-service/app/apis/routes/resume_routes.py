@@ -11,6 +11,8 @@ from app.dependencies.parser_deps import get_resume_parse_service
 from app.services.interface.resume_parser import ResumeParsingServiceInterface
 from app.dependencies.auth import get_current_user_id
 
+from app.services.resume_processing import ResumeProcessingService
+from app.dependencies.parser_deps import get_resume_processing_service
 
 from app.dependencies.service_deps import get_resume_service
 
@@ -26,20 +28,19 @@ async def upload_resume(
     background_tasks : BackgroundTasks,
     x_user_id: UUID = Header(...),
     file: UploadFile = File(...),
-    parsing_service : ResumeParsingServiceInterface= Depends(get_resume_parse_service),
+    resume_processing_service : ResumeProcessingService= Depends(get_resume_processing_service),
     resume_service: ResumeServiceInterface = Depends(get_resume_service),
 
 
 ):
 
-    print("this is the user id " , x_user_id)
     resume = await resume_service.upload_resume(
         user_id=x_user_id,
         file=file,
     )
 
     background_tasks.add_task(
-        parsing_service.process_resume,
+        resume_processing_service.process_resume,
         resume.id,
         Path(resume.file_url),
     )

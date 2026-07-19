@@ -21,8 +21,11 @@ from app.repository.interface.resume_project import ResumeProjectRepositoryInter
 
 from app.repository.interface.resume_expriennc import ResumeExprienceRepositoryInteraface
 
+from app.services.resume_analysis.interface.analysis import ResumeAnalysisServiceInterface
+from app.services.resume_processing import ResumeProcessingService
 
 
+from app.dependencies.service_deps import get_resume_analysis_service
 async def get_pdf_extractor_service() -> ResumeTextExtractorInterface:
     return PDFTextExtractor()
 
@@ -50,4 +53,19 @@ async def get_resume_parse_service(
         edu_repo=edu_repo,
         project_repo=project_repo,
         exp_repo=exp_repo
+    )
+
+async def get_resume_processing_service(
+    resume_repo: ResumeRepositoryInterface = Depends(get_resume_repo),
+    parsing_service: ResumeParsingServiceInterface = Depends(
+        get_resume_parse_service
+    ),
+    analysis_service: ResumeAnalysisServiceInterface = Depends(
+        get_resume_analysis_service
+    ),
+) -> ResumeProcessingService:
+    return ResumeProcessingService(
+        resume_repo=resume_repo,
+        parsing_service=parsing_service,
+        analysis_service=analysis_service,
     )
