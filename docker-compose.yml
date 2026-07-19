@@ -13,7 +13,7 @@ services:
       - auth-service
     restart: unless-stopped
 
-    
+
   auth-service:
     build:
       context: ./services/auth-service
@@ -31,7 +31,7 @@ services:
     depends_on:
       - postgres
 
-    
+
   resume-service:
     build:
       context: ./services/resume-service
@@ -49,6 +49,21 @@ services:
       - postgres
       - redis
 
+  resume-worker:
+    build:
+      context: ./services/resume-service
+    container_name: resume-worker
+    command: arq app.workers.resume_worker.WorkerSettings
+    env_file:
+      - ./services/resume-service/.env
+    volumes:
+      - ./services/resume-service/app:/app/app
+      - ./services/resume-service/uploads:/app/uploads
+    depends_on:
+    - redis
+    - postgres
+    restart: unless-stopped
+
   postgres:
     image: postgres:16
     container_name: ai-postgres
@@ -60,7 +75,7 @@ services:
       - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-  
+
   postgres-test:
     image: postgres:16
     container_name: ai-postgres-test
@@ -78,14 +93,13 @@ services:
     container_name: ai-redis
     ports:
     - "6379:6379"
-    
-  
 
-      
+
+
+
 
 
 volumes:
   postgres_data:
   postgres_test_data:
 
-  

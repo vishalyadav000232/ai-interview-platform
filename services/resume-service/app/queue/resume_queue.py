@@ -16,7 +16,8 @@ class ResumeQueue:
         job  = await self.redis.enqueue_job(
             'process_resume_job',
             str(resume_id),
-            str(file_path)
+            str(file_path),
+             _max_tries=3
         )
 
         if job is None:

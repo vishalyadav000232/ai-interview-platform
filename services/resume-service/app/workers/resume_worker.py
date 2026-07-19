@@ -3,7 +3,7 @@ from pathlib import Path
 from uuid import UUID
 
 from arq.connections import RedisSettings
-
+from arq import Retry
 from app.core.config import settings
 from app.database.session import AsyncLoaclSession
 from app.factories.resume_processing_factory import (
@@ -44,7 +44,7 @@ async def process_resume_job(
             "Resume processing failed | resume_id=%s",
             resume_id,
         )
-        raise
+        raise Retry(defer=5)
 
 
 class WorkerSettings:

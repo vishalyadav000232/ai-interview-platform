@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import func, select, update
@@ -7,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.models.resume import Resume, ResumeStatus
 from app.repository.base import BaseRepository
 from app.repository.interface.resume import ResumeRepositoryInterface
-from datetime import datetime
+
 
 logger = logging.getLogger(__name__)
 
@@ -82,18 +83,53 @@ class ResumeRepository(
         commit: bool = True,
     ) -> Resume | None:
         try:
-            values = {
+            values: dict = {
                 "status": status,
+                "updated_at": func.now(),
             }
 
-            if failure_reason is not None:
-                values["failure_reason"] = failure_reason
 
-            if status == ResumeStatus.PROCESSING:
-                values["processing_started_at"] = func.now()
+            if status == ResumeStatus.QUEUED:
+                values.update(
+                    {
+                        "failure_reason": None,
+                        "processing_started_at": None,
+                        "processing_completed_at": None,
+                    }
+                )
 
-            if status in (ResumeStatus.ANALYZED, ResumeStatus.FAILED):
-                values["processing_completed_at"] = func.now()
+            elif status == ResumeStatus.PROCESSING:
+                values.update(
+                    {
+                        "failure_reason": None,
+                        "processing_started_at": func.now(),
+                        "processing_completed_at": None,
+                    }
+                )
+
+            elif status == ResumeStatus.ANALYZED:
+                values.update(
+                    {
+                        "failure_reason": None,
+                        "processing_completed_at": func.now(),
+                    }
+                )
+            elif status == ResumeStatus.FAILED:
+                values.update(
+                    {
+                        "failure_reason": failure_reason,
+                        "processing_completed_at": func.now(),
+                    }
+                )
+
+            elif status == ResumeStatus.UPLOADED:
+                values.update(
+                    {
+                        "failure_reason": None,
+                        "processing_started_at": None,
+                        "processing_completed_at": None,
+                    }
+                )
 
             result = await self.db.execute(
                 update(Resume)
@@ -110,6 +146,7 @@ class ResumeRepository(
             if resume is None:
                 if commit:
                     await self.db.rollback()
+
                 return None
 
             if commit:
@@ -133,6 +170,52 @@ class ResumeRepository(
 
             raise
 
+    async def mark_queued(
+        self,
+        resume_id: UUID,
+        commit: bool = True,
+    ) -> Resume | None:
+        return await self.update_status(
+            resume_id=resume_id,
+            status=ResumeStatus.QUEUED,
+            commit=commit,
+        )
+
+    async def mark_processing(
+        self,
+        resume_id: UUID,
+        commit: bool = True,
+    ) -> Resume | None:
+        return await self.update_status(
+            resume_id=resume_id,
+            status=ResumeStatus.PROCESSING,
+            commit=commit,
+        )
+
+    async def mark_analyzed(
+        self,
+        resume_id: UUID,
+        commit: bool = True,
+    ) -> Resume | None:
+        return await self.update_status(
+            resume_id=resume_id,
+            status=ResumeStatus.ANALYZED,
+            commit=commit,
+        )
+
+    async def mark_failed(
+        self,
+        resume_id: UUID,
+        failure_reason: str,
+        commit: bool = True,
+    ) -> Resume | None:
+        return await self.update_status(
+            resume_id=resume_id,
+            status=ResumeStatus.FAILED,
+            failure_reason=failure_reason,
+            commit=commit,
+        )
+
     async def update_parsed_text(
         self,
         resume_id: UUID,
@@ -148,6 +231,7 @@ class ResumeRepository(
                 )
                 .values(
                     parsed_text=parsed_text,
+                    updated_at=func.now(),
                 )
                 .returning(Resume)
             )
@@ -157,6 +241,7 @@ class ResumeRepository(
             if resume is None:
                 if commit:
                     await self.db.rollback()
+
                 return None
 
             if commit:
@@ -194,12 +279,14 @@ class ResumeRepository(
                 .values(
                     is_active=False,
                     is_deleted=True,
+                    updated_at=func.now(),
                 )
             )
 
             if result.rowcount == 0:
                 if commit:
                     await self.db.rollback()
+
                 return False
 
             if commit:
@@ -221,19 +308,19 @@ class ResumeRepository(
 
             raise
 
-
     async def get_stale_processing_resumes(
-    self,
-    before: datetime,
-) -> list[Resume]:
-        stmt = (
+        self,
+        before: datetime,
+    ) -> list[Resume]:
+        result = await self.db.execute(
             select(Resume)
             .where(
                 Resume.status == ResumeStatus.PROCESSING,
+                Resume.processing_started_at.is_not(None),
                 Resume.processing_started_at < before,
+                Resume.is_deleted.is_(False),
             )
+            .order_by(Resume.processing_started_at.asc())
         )
-
-        result = await self.session.execute(stmt)
 
         return list(result.scalars().all())
