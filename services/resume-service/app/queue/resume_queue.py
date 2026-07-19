@@ -17,7 +17,7 @@ class ResumeQueue:
             'process_resume_job',
             str(resume_id),
             str(file_path),
-             _max_tries=3
+            
         )
 
         if job is None:

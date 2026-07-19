@@ -64,3 +64,5 @@ class ResumeProcessingService:
                 status=ResumeStatus.FAILED,
                 failure_reason=str(exc),
             )
+
+            raise

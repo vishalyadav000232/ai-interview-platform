@@ -81,13 +81,4 @@ async def process_resume_job(
             raise Retry(defer=5)
 
 
-class WorkerSettings:
-    functions = [
-        process_resume_job,
-    ]
 
-    redis_settings = RedisSettings.from_dsn(
-        settings.REDIS_URL,
-    )
-
-    max_tries = 3

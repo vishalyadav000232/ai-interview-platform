@@ -53,7 +53,7 @@ services:
     build:
       context: ./services/resume-service
     container_name: resume-worker
-    command: arq app.workers.resume_worker.WorkerSettings
+    command: arq app.workers.worker_settings.WorkerSettings
     env_file:
       - ./services/resume-service/.env
     volumes:
