@@ -15,6 +15,7 @@ from app.services.resume_processing import ResumeProcessingService
 from app.dependencies.parser_deps import get_resume_processing_service
 
 from app.dependencies.service_deps import get_resume_service
+from app.queue.resume_queue import ResumeQueue , get_resume_queue
 
 router = APIRouter()
 
@@ -25,24 +26,19 @@ router = APIRouter()
     response_model=ResumeDataResponse,
 )
 async def upload_resume(
-    background_tasks : BackgroundTasks,
     x_user_id: UUID = Header(...),
     file: UploadFile = File(...),
-    resume_processing_service : ResumeProcessingService= Depends(get_resume_processing_service),
     resume_service: ResumeServiceInterface = Depends(get_resume_service),
-
-
+    resume_queue: ResumeQueue = Depends(get_resume_queue),
 ):
-
     resume = await resume_service.upload_resume(
         user_id=x_user_id,
         file=file,
     )
 
-    background_tasks.add_task(
-        resume_processing_service.process_resume,
-        resume.id,
-        Path(resume.file_url),
+    await resume_queue.enqueue_resume_processing(
+        resume_id=resume.id,
+        file_path=Path(resume.file_url),
     )
 
     return {
@@ -50,7 +46,6 @@ async def upload_resume(
         "message": "Resume uploaded successfully",
         "data": resume,
     }
-
 
 @router.get(
     "/user/{user_id}",

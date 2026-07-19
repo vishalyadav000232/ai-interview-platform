@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 from uuid import UUID
 
@@ -10,18 +11,40 @@ from app.factories.resume_processing_factory import (
 )
 
 
+logger = logging.getLogger(__name__)
+
+
 async def process_resume_job(
     ctx: dict,
     resume_id: str,
     file_path: str,
 ) -> None:
-    async with AsyncLoaclSession() as db:
-        processing_service = build_resume_processing_service(db)
+    logger.info(
+        "Resume worker received job | resume_id=%s | file_path=%s",
+        resume_id,
+        file_path,
+    )
 
-        await processing_service.process_resume(
-            resume_id=UUID(resume_id),
-            file_path=Path(file_path),
+    try:
+        async with AsyncLoaclSession() as db:
+            processing_service = build_resume_processing_service(db)
+
+            await processing_service.process_resume(
+                resume_id=UUID(resume_id),
+                file_path=Path(file_path),
+            )
+
+        logger.info(
+            "Resume processed successfully | resume_id=%s",
+            resume_id,
         )
+
+    except Exception:
+        logger.exception(
+            "Resume processing failed | resume_id=%s",
+            resume_id,
+        )
+        raise
 
 
 class WorkerSettings:

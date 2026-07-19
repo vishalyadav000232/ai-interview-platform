@@ -19,7 +19,7 @@ class ResumeQueue:
             str(file_path)
         )
 
-        if job in None:
+        if job is None:
              raise RuntimeError(
                 f"Failed to enqueue resume processing job: {resume_id}"
             )
