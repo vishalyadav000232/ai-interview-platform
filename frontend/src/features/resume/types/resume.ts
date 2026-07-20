@@ -1,5 +1,6 @@
 export type ResumeStatus =
     | "uploaded"
+    | "queued"
     | "processing"
     | "analyzed"
     | "failed";
@@ -15,6 +16,13 @@ export interface ResumeData {
 }
 
 export interface ResumeUploadResponse {
+    success: boolean;
     message: string;
     data: ResumeData;
+}
+
+export interface ResumeListResponse {
+    success: boolean;
+    message: string;
+    data: ResumeData[];
 }

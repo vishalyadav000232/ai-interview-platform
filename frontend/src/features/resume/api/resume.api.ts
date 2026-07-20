@@ -1,5 +1,8 @@
 import { baseAPI } from "../../../api/axios";
-import type { ResumeUploadResponse } from "../types/resume";
+import type {
+    ResumeUploadResponse,
+    ResumeListResponse,
+} from "../types/resume";
 
 export const uploadResume = async (
     file: File,
@@ -16,6 +19,14 @@ export const uploadResume = async (
                 "Content-Type": "multipart/form-data",
             },
         },
+    );
+
+    return response.data;
+};
+
+export const getMyResume = async (): Promise<ResumeListResponse> => {
+    const response = await baseAPI.get<ResumeListResponse>(
+        "/resume/my-resume",
     );
 
     return response.data;
