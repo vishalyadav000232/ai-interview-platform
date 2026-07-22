@@ -13,6 +13,8 @@ export interface ResumeData {
     status: ResumeStatus;
     created_at: string;
     updated_at: string;
+    failure_reason: string;
+
 }
 
 export interface ResumeUploadResponse {
