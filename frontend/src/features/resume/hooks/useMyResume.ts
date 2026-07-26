@@ -9,6 +9,7 @@ export const useMyResume = () => {
 
         refetchInterval: (query) => {
             const latestResume = query.state.data?.data?.[0];
+            console.log("resume" , query.state.data)
 
             if (
                 latestResume?.status === "queued" ||
