@@ -20,5 +20,6 @@ export const useMyResume = () => {
 
             return false;
         },
+        refetchIntervalInBackground: false
     });
 };
