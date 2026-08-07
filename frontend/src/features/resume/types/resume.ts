@@ -28,3 +28,36 @@ export interface ResumeListResponse {
     message: string;
     data: ResumeData[];
 }
+
+
+
+
+
+export interface ResumeAnalysisResponse {
+    id: string;
+    resume_id: string;
+
+    overall_score: number;
+
+    profile_score: number;
+    skills_score: number;
+    education_score: number;
+    experience_score: number;
+    projects_score: number;
+
+    resume_completeness: number;
+    keyword_match_percentage: number;
+
+    matched_skills: string[];
+    missing_skills: string[];
+
+    suggestions: string[];
+    strengths: string[];
+    weaknesses: string[];
+
+    analysis_version: string;
+    analysis_time_ms: number;
+
+    created_at: string;
+    updated_at: string;
+}

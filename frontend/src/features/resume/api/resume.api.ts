@@ -2,6 +2,7 @@ import { baseAPI } from "../../../api/axios";
 import type {
     ResumeUploadResponse,
     ResumeListResponse,
+    ResumeAnalysisResponse
 } from "../types/resume";
 
 export const uploadResume = async (
@@ -30,4 +31,21 @@ export const getMyResume = async (): Promise<ResumeListResponse> => {
     );
 
     return response.data;
+};
+
+
+export const getResumeAnalysis = async (
+    resumeId: string,
+): Promise<ResumeAnalysisResponse> => {
+
+
+    const response = await baseAPI.get<ResumeAnalysisResponse>(
+        `/resume/${resumeId}/analysis`
+    );
+
+    
+
+
+    return response.data;
+
 };
