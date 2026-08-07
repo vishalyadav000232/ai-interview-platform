@@ -43,8 +43,25 @@ export const getResumeAnalysis = async (
         `/resume/${resumeId}/analysis`
     );
 
-    
 
+
+
+    return response.data;
+
+};
+
+
+
+export const downloadResume = async (
+    resumeId: string,
+) => {
+
+    const response = await baseAPI.get(
+        `/resume/download/${resumeId}`,
+        {
+            responseType: "blob",
+        },
+    );
 
     return response.data;
 
