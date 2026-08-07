@@ -747,7 +747,7 @@ class ResumeAnalysisService:
             #     raise ResumeNotFound()
 
             analysis = (
-                await self.analysis_repo.get_by_id(
+                await self.analysis_repo.get_latest_by_resume_id(
                     resume_id
                 )
             )
